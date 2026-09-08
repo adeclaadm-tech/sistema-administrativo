@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Sistema visual ADECLA
+   ---------------------------------------------------------------------------
+   La paleta es la misma del MVP de inscripciones al torneo: teal oficial del
+   brand book (#00a99d), teal profundo para botones (#00776d), blanco hueso de
+   fondo y Tinta en lugar de negro plano. Fraunces en titulares, Public Sans en
+   datos y formularios, IBM Plex Mono para RNC, montos y números de proforma.
+
+   Reglas heredadas que este sistema respeta:
+   · El teal es acento, no fondo: nunca pasa del 10% de la pantalla.
+   · Ningún texto en negro puro; todo pasa por la Tinta.
+   · Las tarjetas son planas en reposo; la sombra se gana con hover o foco.
+   · El oro nombra, no acciona: se reserva para el año del ciclo, jamás para
+     estados, montos ni botones.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --color-hueso: oklch(0.99 0.007 106.5); /* #fcfcf7 — fondo base */
+  --color-superficie: #ffffff; /* tarjetas y paneles */
+  --color-tinta: oklch(0.32 0.025 200); /* #233738 — texto por defecto */
+  --color-tinta-suave: oklch(0.5 0.02 195); /* texto secundario */
+  --color-tinta-tenue: oklch(0.62 0.015 195); /* etiquetas y metadatos */
+
+  --color-teal: oklch(0.661 0.116 185.9); /* #00a99d — acento de marca */
+  --color-teal-boton: oklch(0.5 0.116 185.9); /* #00776d — fondo de CTA */
+  --color-teal-hover: oklch(0.44 0.11 186); /* #005f57 */
+  --color-teal-suave: oklch(0.95 0.02 205); /* lavado para chips */
+  --color-teal-secundario: oklch(0.68 0.097 212.1); /* #42a8bb */
+
+  --color-borde: oklch(0.934 0 89.9); /* #e9e9e9 */
+  --color-borde-fuerte: oklch(0.86 0.005 200);
+
+  --color-oro: oklch(0.56 0.105 75); /* nombra el ciclo, no acciona */
+  --color-oro-suave: oklch(0.95 0.03 80);
+
+  /* Estados: cada uno con su pastel y su versión oscura para el texto. */
+  --color-activo: oklch(0.5 0.1 160);
+  --color-activo-suave: oklch(0.95 0.035 160);
+  --color-pendiente: oklch(0.55 0.12 70);
+  --color-pendiente-suave: oklch(0.96 0.05 80);
+  --color-vencido: oklch(0.55 0.16 33); /* terracota #c4432a */
+  --color-vencido-suave: oklch(0.95 0.04 33);
+
+  --font-heading: "Fraunces", Georgia, serif;
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius-card: 14px;
+  --radius-control: 8px;
+
+  --ease-adecla: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-hueso);
+    color: var(--color-tinta);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    color: var(--color-tinta);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Toda cifra alinea dígito con dígito: es lo que hace legible una tabla de
+     montos y una columna de RNC. */
+  .cifra,
+  td.cifra,
+  input[type="number"] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px oklch(0.661 0.116 185.9 / 0.35);
+    border-radius: var(--radius-control);
+  }
+}
+
+@layer components {
+  .etiqueta {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-tinta-tenue);
+  }
+
+  .tarjeta {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radius-card);
+  }
+
+  /* La sombra se gana: solo en tarjetas que responden al mouse. */
+  .tarjeta-interactiva {
+    transition:
+      box-shadow 0.35s var(--ease-adecla),
+      transform 0.35s var(--ease-adecla);
+  }
+  .tarjeta-interactiva:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px -14px oklch(0.32 0.025 200 / 0.28);
+  }
+
+  .campo {
+    width: 100%;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radius-control);
+    padding: 0.7rem 0.85rem;
+    font-size: 0.95rem;
+    color: var(--color-tinta);
+    transition: border-color 0.25s var(--ease-adecla);
+  }
+  .campo:hover {
+    border-color: var(--color-borde-fuerte);
+  }
+  .campo::placeholder {
+    color: var(--color-tinta-tenue);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta-interactiva:hover {
+    transform: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

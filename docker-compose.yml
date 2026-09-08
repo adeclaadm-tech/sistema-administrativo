@@ -1,0 +1,106 @@
+# Desarrollo local: Postgres + backend + frontend + MinIO como sustituto de R2.
+#
+# El objetivo es que lo que corre aquí sea lo mismo que corre en Railway: las
+# diferencias viven en el .env, no en el código.
+#
+#   docker compose up --build
+#   docker compose exec backend alembic upgrade head
+#   docker compose exec backend python -m app.scripts.seed
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: adecla-db
+    environment:
+      POSTGRES_USER: adecla
+      POSTGRES_PASSWORD: adecla
+      POSTGRES_DB: adecla
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adecla -d adecla"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Sustituto local de Cloudflare R2. Habla el mismo protocolo S3, así que el
+  # backend no sabe la diferencia: solo cambia S3_ENDPOINT_URL.
+  storage:
+    image: minio/minio:latest
+    container_name: adecla-storage
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: adecla
+      MINIO_ROOT_PASSWORD: adecla-local-secret
+    ports:
+      - "9000:9000"
+      - "9001:9001" # consola web
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Crea el bucket la primera vez y se apaga.
+  storage-init:
+    image: minio/mc:latest
+    depends_on:
+      storage:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://storage:9000 adecla adecla-local-secret; do sleep 2; done;
+      mc mb --ignore-existing local/adecla-documentos;
+      echo 'Bucket adecla-documentos listo.';
+      "
+
+  backend:
+    build: ./backend
+    container_name: adecla-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      DEBUG: "true"
+      DATABASE_URL: postgresql+psycopg://adecla:adecla@db:5432/adecla
+      JWT_SECRET: llave-solo-para-desarrollo-local
+      CORS_ORIGINS: http://localhost:5173,http://localhost:4173
+      S3_ENDPOINT_URL: http://storage:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: adecla
+      S3_SECRET_ACCESS_KEY: adecla-local-secret
+      S3_BUCKET: adecla-documentos
+      CUOTA_ANUAL_DEFAULT: "45000"
+    ports:
+      - "8000:8000"
+    volumes:
+      # Recarga en caliente mientras se desarrolla.
+      - ./backend:/app
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    image: node:22-alpine
+    container_name: adecla-frontend
+    working_dir: /app
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+
+volumes:
+  postgres_data:
+  minio_data:
+  frontend_node_modules:

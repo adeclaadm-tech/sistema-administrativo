@@ -1,0 +1,31 @@
+# Entorno
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Sistema
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Nunca se versionan documentos de afiliados: viven en el bucket.
+uploads/
+*.xlsx
+!**/plantillas/*.xlsx
