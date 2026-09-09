@@ -25,9 +25,25 @@ export function moneyCorto(valor: string | number | null | undefined): string {
   return money(n);
 }
 
+const SOLO_FECHA = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * `new Date("2026-12-31")` se interpreta como medianoche UTC y, en Santo
+ * Domingo (UTC-4), se muestra como 30 de diciembre. Las fechas sin hora que
+ * manda el backend (vencimiento, fecha de pago) son días de calendario, no
+ * instantes: se arman en horario local para que el día no se corra.
+ * Los campos con hora (`fecha_subida`, `creado_en`) sí llevan zona y pasan
+ * por el constructor normal.
+ */
+function aFechaLocal(valor: string): Date {
+  const partes = SOLO_FECHA.exec(valor);
+  if (!partes) return new Date(valor);
+  return new Date(Number(partes[1]), Number(partes[2]) - 1, Number(partes[3]));
+}
+
 export function fecha(valor: string | null | undefined): string {
   if (!valor) return "—";
-  return new Date(valor).toLocaleDateString("es-DO", {
+  return aFechaLocal(valor).toLocaleDateString("es-DO", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -36,7 +52,7 @@ export function fecha(valor: string | null | undefined): string {
 
 export function fechaCorta(valor: string | null | undefined): string {
   if (!valor) return "—";
-  return new Date(valor).toLocaleDateString("es-DO", {
+  return aFechaLocal(valor).toLocaleDateString("es-DO", {
     day: "2-digit",
     month: "2-digit",
     year: "2-digit",

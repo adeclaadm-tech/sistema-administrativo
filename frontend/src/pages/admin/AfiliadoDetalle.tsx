@@ -308,30 +308,38 @@ export default function AfiliadoDetalle() {
           {pagos.length === 0 ? (
             <Vacio titulo="Sin pagos" detalle="Registra el primer pago desde el botón de arriba." />
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-borde">
-                  <th className="etiqueta py-2 text-left">Período</th>
-                  <th className="etiqueta py-2 text-left">Proforma</th>
-                  <th className="etiqueta py-2 text-left">Fecha</th>
-                  <th className="etiqueta py-2 text-left">Método</th>
-                  <th className="etiqueta py-2 text-right">Monto</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pagos.map((pago) => (
-                  <tr key={pago.id} className="border-b border-borde last:border-0">
-                    <td className="py-3">{pago.concepto ?? `Cuota ${pago.periodo ?? ""}`}</td>
-                    <td className="cifra py-3 font-mono text-xs text-tinta-suave">
-                      {proformaDe.get(pago.id)?.numero ?? "—"}
-                    </td>
-                    <td className="py-3 text-tinta-suave">{fecha(pago.fecha)}</td>
-                    <td className="py-3 text-tinta-suave capitalize">{pago.metodo}</td>
-                    <td className="cifra py-3 text-right font-mono">{money(pago.monto)}</td>
+            // Cinco columnas dentro de media tarjeta: sin scroll propio, el
+            // método y el monto terminan pegados uno al otro.
+            <div className="-mx-2 overflow-x-auto px-2">
+              <table className="w-full min-w-[26rem] text-sm">
+                <thead>
+                  <tr className="border-b border-borde">
+                    <th className="etiqueta py-2 pr-4 text-left">Período</th>
+                    <th className="etiqueta py-2 pr-4 text-left">Proforma</th>
+                    <th className="etiqueta py-2 pr-4 text-left">Fecha</th>
+                    <th className="etiqueta py-2 pr-4 text-left">Método</th>
+                    <th className="etiqueta py-2 pl-4 text-right">Monto</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {pagos.map((pago) => (
+                    <tr key={pago.id} className="border-b border-borde last:border-0">
+                      <td className="py-3 pr-4">{pago.concepto ?? `Cuota ${pago.periodo ?? ""}`}</td>
+                      <td className="cifra py-3 pr-4 font-mono text-xs whitespace-nowrap text-tinta-suave">
+                        {proformaDe.get(pago.id)?.numero ?? "—"}
+                      </td>
+                      <td className="py-3 pr-4 whitespace-nowrap text-tinta-suave">
+                        {fecha(pago.fecha)}
+                      </td>
+                      <td className="py-3 pr-4 text-tinta-suave capitalize">{pago.metodo}</td>
+                      <td className="cifra py-3 pl-4 text-right font-mono whitespace-nowrap">
+                        {money(pago.monto)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Tarjeta>
       </div>

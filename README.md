@@ -160,8 +160,17 @@ Las migraciones corren solas al arrancar el backend. Para datos de prueba:
 docker compose exec backend python -m app.scripts.seed
 ```
 
-Deja dos cuentas de staff (`gestion@adecla.do` y `consulta@adecla.do`, clave
-`adecla2026`) y ocho constructoras con documentos, pagos y contactos.
+Deja ocho constructoras con documentos, pagos y contactos por área, y estas
+cuentas:
+
+| Cuenta | Clave | Entra a |
+| --- | --- | --- |
+| `gestion@adecla.do` | `adecla2026` | panel, como administrador |
+| `consulta@adecla.do` | `adecla2026` | panel, como consultor (solo lectura) |
+| `admin@constructora-bavaro.do` | `afiliado2026` | portal de afiliados |
+
+El correo de cada constructora sale de su razón social; también se puede entrar
+al portal con el RNC (`1-31-45678-9`).
 
 ### Sin Docker
 

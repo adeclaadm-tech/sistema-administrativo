@@ -17,8 +17,11 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.db.session import engine
 
-logging.basicConfig(level=logging.INFO if not settings.DEBUG else logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG if settings.DEBUG else logging.INFO)
 logger = logging.getLogger("adecla")
+
+if settings.SQL_ECHO:
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 app = FastAPI(
     title=settings.APP_NAME,

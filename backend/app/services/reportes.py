@@ -168,22 +168,21 @@ def _barras_por_mes(db: Session, desde: date, hasta: date) -> list[BarraMes]:
         .order_by("anio", "mes")
     ).all()
 
-    recaudo = dict(
-        db.execute(
+    # Año y mes van como dos columnas y no concatenados: SQLAlchemy numera los
+    # parámetros del separador distinto en el SELECT y en el GROUP BY, y
+    # Postgres deja de ver una sola expresión agrupada.
+    recaudo = {
+        (int(anio), int(mes)): total
+        for anio, mes, total in db.execute(
             select(
-                func.concat(
-                    func.extract("year", Pago.fecha), "-", func.extract("month", Pago.fecha)
-                ),
+                func.extract("year", Pago.fecha).label("anio"),
+                func.extract("month", Pago.fecha).label("mes"),
                 func.coalesce(func.sum(Pago.monto), 0),
             )
             .where(Pago.fecha.between(desde, hasta))
-            .group_by(
-                func.concat(
-                    func.extract("year", Pago.fecha), "-", func.extract("month", Pago.fecha)
-                )
-            )
+            .group_by("anio", "mes")
         ).all()
-    )
+    }
 
     acumulado: dict[tuple[int, int], BarraMes] = {}
     for anio, mes, estado, total in filas:
@@ -198,8 +197,8 @@ def _barras_por_mes(db: Session, desde: date, hasta: date) -> list[BarraMes]:
         else:
             barra.vencidos = total
 
-    for (anio, mes), barra in acumulado.items():
-        barra.recaudado = Decimal(recaudo.get(f"{anio}-{mes}", 0) or 0)
+    for clave, barra in acumulado.items():
+        barra.recaudado = Decimal(recaudo.get(clave, 0) or 0)
 
     return [acumulado[c] for c in sorted(acumulado)]
 

@@ -93,6 +93,9 @@ services:
       - backend
     environment:
       VITE_API_URL: http://localhost:8000/api/v1
+      # El bind mount de Windows/macOS no propaga eventos de archivo al
+      # contenedor; sin esto el HMR se queda mudo.
+      VITE_USE_POLLING: "true"
     ports:
       - "5173:5173"
     volumes:

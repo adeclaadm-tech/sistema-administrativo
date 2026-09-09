@@ -10,6 +10,8 @@ No se ejecuta en producción. En Railway se corre solo `alembic upgrade head`.
 """
 
 import random
+import re
+import unicodedata
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -57,6 +59,17 @@ CUOTA = {
     CategoriaAfiliado.CLASE_C: Decimal("28000.00"),
 }
 
+# Se descartan del slug: media docena de empresas terminan en SRL o SA y el
+# correo saldría repetido (admin@sa.do para dos constructoras distintas).
+SUFIJOS_LEGALES = {"srl", "sa", "eirl", "sas", "srls"}
+
+
+def slug_empresa(nombre: str) -> str:
+    """Constructora Bávaro SRL -> constructora-bavaro"""
+    sin_acentos = unicodedata.normalize("NFKD", nombre).encode("ascii", "ignore").decode()
+    palabras = [p for p in re.findall(r"[a-z0-9]+", sin_acentos.lower()) if p not in SUFIJOS_LEGALES]
+    return "-".join(palabras)
+
 
 def sembrar() -> None:
     random.seed(2026)
@@ -80,8 +93,10 @@ def sembrar() -> None:
             if db.scalar(select(Afiliado).where(Afiliado.rnc_cedula == rnc)):
                 continue
 
-            slug = nombre.lower().split()[-1].replace(".", "")
+            slug = slug_empresa(nombre)
             email = f"admin@{slug}.do"
+            if db.scalar(select(Usuario).where(func.lower(Usuario.email) == email)):
+                continue
 
             usuario = Usuario(
                 email=email,
@@ -176,7 +191,8 @@ def sembrar() -> None:
     print("Datos de prueba cargados.")
     print("  Panel admin  gestion@adecla.do / adecla2026   (administrador)")
     print("               consulta@adecla.do / adecla2026  (consultor)")
-    print("  Portal       admin@srl.do / afiliado2026      (u otro correo de la lista)")
+    print("  Portal       admin@constructora-bavaro.do / afiliado2026")
+    print("               (el correo de cada empresa sale de su razón social)")
     if not settings.storage_configurado:
         print("  Nota: sin storage configurado, los documentos son referencias sin archivo real.")
 

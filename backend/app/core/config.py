@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"  # development | staging | production
     API_V1_PREFIX: str = "/api/v1"
     DEBUG: bool = False
+    # Vuelca cada consulta al log. Va aparte de DEBUG: querer trazas de la app
+    # no es querer el SQL de cada petición encima.
+    SQL_ECHO: bool = False
 
     # --- Base de datos ---
     # Acepta tal cual la URL que entregan Neon, Supabase o Railway.

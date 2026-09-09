@@ -3,22 +3,33 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Literal
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.core.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 TipoToken = Literal["access", "refresh"]
+
+# bcrypt ignora todo lo que pase de 72 bytes. Se recorta explícitamente para que
+# el hash y la verificación vean lo mismo en contraseñas largas o con acentos.
+LIMITE_BCRYPT = 72
+
+
+def _a_bytes(password: str) -> bytes:
+    return password.encode("utf-8")[:LIMITE_BCRYPT]
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(_a_bytes(password), bcrypt.gensalt()).decode("utf-8")
 
 
 def verificar_password(plano: str, hasheado: str) -> bool:
-    return pwd_context.verify(plano, hasheado)
+    try:
+        return bcrypt.checkpw(_a_bytes(plano), hasheado.encode("utf-8"))
+    except ValueError:
+        # Hash corrupto o con un formato que bcrypt no reconoce: no es una
+        # coincidencia, pero tampoco un 500.
+        return False
 
 
 def crear_token(
