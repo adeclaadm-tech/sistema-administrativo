@@ -6,9 +6,10 @@ en el código: mover el backend de Railway a un droplet propio debería ser
 cuestión de copiar el .env, no de tocar Python.
 """
 
+import sys
 from functools import lru_cache
 
-from pydantic import Field, field_validator
+from pydantic import Field, ValidationError, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -64,7 +65,21 @@ class Settings(BaseSettings):
 
         SQLAlchemy necesita saber qué driver usar; forzamos psycopg 3 sin
         obligar a nadie a editar la URL que copió del proveedor.
+
+        Si la variable llega vacía se corta aquí con el motivo escrito: dejarla
+        pasar produce un `Could not parse SQLAlchemy URL from string ''` a
+        cuarenta líneas de profundidad dentro de Alembic, que no dice nada de
+        lo que hay que arreglar.
         """
+        v = (v or "").strip()
+        if not v:
+            raise ValueError(
+                "DATABASE_URL llegó vacía. En Railway suele ser que la referencia "
+                "${{Postgres.DATABASE_URL}} no resolvió: revisa que el servicio de "
+                "Postgres esté en el mismo proyecto y que su nombre coincida con el "
+                "de la referencia. Con Neon o Supabase, pega la cadena de conexión."
+            )
+
         if v.startswith("postgres://"):
             v = v.replace("postgres://", "postgresql+psycopg://", 1)
         elif v.startswith("postgresql://"):
@@ -84,7 +99,17 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    try:
+        return Settings()
+    except ValidationError as exc:
+        # Una configuración incompleta es un error de operación, no un bug: se
+        # informa qué falta en dos líneas y se sale. El traceback de pydantic
+        # enterrado dentro de Alembic no le sirve a nadie.
+        print("No se pudo iniciar: revisa las variables de entorno.", file=sys.stderr)
+        for error in exc.errors():
+            campo = ".".join(str(parte) for parte in error["loc"])
+            print(f"  · {campo}: {error['msg']}", file=sys.stderr)
+        raise SystemExit(1) from None
 
 
 settings = get_settings()
