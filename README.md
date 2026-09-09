@@ -207,39 +207,78 @@ docker compose exec backend alembic downgrade -1
 
 1. **New Project → Deploy from GitHub repo**, y en Settings pon `backend` como
    *Root Directory*. Railway detecta el `Dockerfile` y el `railway.json`.
-2. Agrega un **Postgres** al proyecto (o usa Neon; da igual, es la misma URL).
+2. Agrega un **Postgres** al proyecto. También sirve una base de Neon: es la
+   misma URL y el código no distingue. El Postgres de Railway ahorra un
+   proveedor y viaja por la red privada del proyecto; Neon conviene si quieres
+   la base fuera de Railway desde el día uno.
 3. Variables del servicio:
 
    | Variable | Valor |
    | --- | --- |
    | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` si usas el Postgres de Railway; si no, pega la de Neon |
-   | `JWT_SECRET` | `openssl rand -hex 32` |
-   | `CORS_ORIGINS` | `https://tu-app.vercel.app,https://afiliados.adecla.do` |
-   | `S3_ENDPOINT_URL` | `https://<account-id>.r2.cloudflarestorage.com` |
-   | `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | del token de R2 |
-   | `S3_BUCKET` | `adecla-documentos` |
+   | `JWT_SECRET` | `openssl rand -hex 32` — uno nuevo, no el de desarrollo |
+   | `CORS_ORIGINS` | el dominio de Vercel, y después el propio: `https://adecla-afiliados.vercel.app,https://afiliados.adecla.do` |
    | `APP_ENV` | `production` |
    | `DEBUG` | `false` |
+   | `S3_*` | ver **Storage**; se pueden dejar vacías al principio |
 
    `PORT` la inyecta Railway; no la definas a mano.
+
 4. El start command ya corre `alembic upgrade head` antes de servir, así que
    cada deploy migra la base. El health check apunta a `/health`.
 5. **Settings → Networking → Generate Domain** para tener la URL pública.
+6. Crea el primer administrador, una sola vez, desde la consola del servicio:
+
+   ```bash
+   python -m app.scripts.crear_admin --email gestion@adecla.do --password "<clave larga>" --nombre "Laura Méndez"
+   ```
+
+   Hace falta porque el registro abierto solo da de alta afiliados y `/usuarios`
+   exige una sesión de administrador: en una base recién migrada, sin esto no
+   hay manera de entrar al panel. El comando no pisa una cuenta existente, así
+   que correrlo dos veces es inofensivo. Agrega `--consultor` para crear una
+   cuenta de solo lectura.
+
+   **No corras el seed en producción**: crea ocho constructoras de mentira.
 
 ### Frontend en Vercel
 
-1. **Import Project**, *Root Directory* → `frontend`. El `vercel.json` ya trae
-   el framework, el build y el rewrite que necesita React Router.
-2. Variable de entorno: `VITE_API_URL = https://<tu-backend>.up.railway.app/api/v1`.
-   Vite la hornea en el bundle, así que hay que redeployar si cambia.
-3. Cuando conectes el dominio propio, agrégalo a `CORS_ORIGINS` en Railway.
+1. **Add New → Project**, importa el repositorio y pon `frontend` como *Root
+   Directory*. El `vercel.json` de esa carpeta ya trae el framework, el build y
+   el rewrite que necesita React Router para que `/admin/afiliados/<id>` no
+   devuelva 404 al recargar.
+2. Variable de entorno: `VITE_API_URL = https://<backend>.up.railway.app/api/v1`,
+   con `/api/v1` al final.
+3. Deploy, y copia el dominio que te asigna.
+4. Vuelve al servicio del backend en Railway y pon ese dominio en
+   `CORS_ORIGINS`. Sin este paso el login parece "no hacer nada": el error solo
+   aparece en la consola del navegador.
 
-### Storage en Cloudflare R2
+**`VITE_API_URL` se hornea en el bundle.** Vite resuelve `import.meta.env` al
+compilar, no al ejecutar: si la cambias, hay que volver a desplegar en Vercel;
+guardarla no basta. Es el motivo por el que el orden es backend primero,
+frontend después.
 
-Crea el bucket `adecla-documentos` y un API token con permiso de lectura y
-escritura. Deja `S3_PUBLIC_BASE_URL` vacío para que el bucket siga privado: el
-backend firma URLs temporales de una hora cuando el frontend necesita mostrar un
-archivo.
+El `Dockerfile` de `frontend/` no lo usa Vercel. Está para el día que todo se
+mude a un droplet: sirve el build con nginx, escucha en `${PORT}` y aborta el
+build si el bundle quedó apuntando a `localhost`.
+
+### Storage de documentos
+
+Cloudflare R2 pide una tarjeta aunque uses la capa gratis. Mientras tanto el
+sistema despliega y funciona sin storage: afiliados, pagos, proformas y reportes
+no lo tocan. Lo único que queda fuera de servicio es subir y ver documentos, que
+responde 503 hasta que existan las llaves.
+
+Cuando tengas la cuenta, crea el bucket `adecla-documentos` y un API token con
+lectura y escritura, y llena `S3_ENDPOINT_URL`, `S3_ACCESS_KEY_ID`,
+`S3_SECRET_ACCESS_KEY` y `S3_BUCKET`. Deja `S3_PUBLIC_BASE_URL` vacío para que
+el bucket siga privado: el backend firma URLs de una hora cuando hay que mostrar
+un archivo. No hace falta redesplegar el backend, solo reiniciarlo.
+
+Cualquier proveedor S3 sirve sin tocar código, únicamente cambiando el endpoint:
+Backblaze B2, Spaces de DigitalOcean o el storage de Supabase, que expone llaves
+compatibles con S3 y no pide tarjeta.
 
 ### Migración futura a un droplet de DigitalOcean
 

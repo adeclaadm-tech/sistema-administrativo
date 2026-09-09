@@ -1,5 +1,11 @@
+# Plantilla: la imagen de nginx corre envsubst sobre /etc/nginx/templates/*.template
+# al arrancar y solo reemplaza variables que existan en el entorno, así que $uri
+# y $http_* sobreviven intactos.
+#
+# El puerto es variable porque Railway lo inyecta en $PORT y cambia entre
+# despliegues; con "listen 80" fijo el contenedor arranca pero queda inalcanzable.
 server {
-  listen 80;
+  listen ${PORT};
   server_name _;
   root /usr/share/nginx/html;
   index index.html;
