@@ -9,11 +9,12 @@ despliegue recién levantado, sin fallar por una credencial que todavía no
 existe.
 """
 
+import base64
 import json
 import logging
 import urllib.error
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 from app.core.config import settings
@@ -29,10 +30,20 @@ class CorreoError(RuntimeError):
 
 
 @dataclass
+class Adjunto:
+    nombre: str
+    contenido: bytes
+    tipo: str = "application/pdf"
+
+
+@dataclass
 class Mensaje:
     para: str
     asunto: str
     html: str
+    # Resend acepta hasta 40 MB por correo contando todo; una proforma pesa
+    # unos 80 KB, así que no hay que trocear nada.
+    adjuntos: list[Adjunto] = field(default_factory=list)
 
 
 # --------------------------------------------------------------------------
@@ -100,9 +111,10 @@ def enviar(mensaje: Mensaje) -> bool:
     """
     if not settings.correo_configurado:
         logger.info(
-            "Correo no enviado (RESEND_API_KEY sin configurar). Para: %s · Asunto: %s",
+            "Correo no enviado (RESEND_API_KEY sin configurar). Para: %s · Asunto: %s%s",
             mensaje.para,
             mensaje.asunto,
+            f" · adjuntos: {[a.nombre for a in mensaje.adjuntos]}" if mensaje.adjuntos else "",
         )
         return False
 
@@ -113,6 +125,20 @@ def enviar(mensaje: Mensaje) -> bool:
             "subject": mensaje.asunto,
             "html": mensaje.html,
             **({"reply_to": [settings.EMAIL_REPLY_TO]} if settings.EMAIL_REPLY_TO else {}),
+            **(
+                {
+                    "attachments": [
+                        {
+                            "filename": a.nombre,
+                            "content": base64.b64encode(a.contenido).decode("ascii"),
+                            "content_type": a.tipo,
+                        }
+                        for a in mensaje.adjuntos
+                    ]
+                }
+                if mensaje.adjuntos
+                else {}
+            ),
         }
     ).encode("utf-8")
 
@@ -145,7 +171,13 @@ def enviar(mensaje: Mensaje) -> bool:
 
 
 def recordatorio_vencimiento(
-    *, para: str, empresa: str, vence: date | None, dias: int | None, monto: str | None
+    *,
+    para: str,
+    empresa: str,
+    vence: date | None,
+    dias: int | None,
+    monto: str | None,
+    proforma: tuple[str, bytes] | None = None,
 ) -> Mensaje:
     portal = settings.FRONTEND_URL.rstrip("/")
 
@@ -177,10 +209,44 @@ def recordatorio_vencimiento(
         "soporte de pago y revisar el estado de tus documentos.</p>"
     )
 
+    if proforma:
+        cuerpo += (
+            f"<p style='margin:0 0 12px;'>Va adjunta la proforma "
+            f"<strong>{proforma[0]}</strong>, con los datos de la cuenta.</p>"
+        )
+
     return Mensaje(
         para=para,
         asunto=f"{titulo} · {empresa}",
         html=armar_html(titulo, cuerpo, (f"{portal}/portal", "Entrar al portal")),
+        adjuntos=[Adjunto(f"{proforma[0]}.pdf", proforma[1])] if proforma else [],
+    )
+
+
+def proforma_emitida(
+    *,
+    para: str,
+    empresa: str,
+    numero: str,
+    monto: str,
+    concepto: str,
+    pdf: bytes | None = None,
+) -> Mensaje:
+    portal = settings.FRONTEND_URL.rstrip("/")
+    titulo = "Tu proforma de pago"
+    cuerpo = (
+        f"<p style='margin:0 0 12px;'>Emitimos la proforma <strong>{numero}</strong> a nombre de "
+        f"{empresa} por {concepto.lower()}.</p>"
+        f"<p style='margin:0 0 12px;'>Monto a pagar: <strong>{monto}</strong>.</p>"
+        "<p style='margin:0 0 12px;'>La adjuntamos en PDF, con los datos de la cuenta para la "
+        "transferencia. Cuando pagues, sube el comprobante desde el portal para que quede "
+        "registrado.</p>"
+    )
+    return Mensaje(
+        para=para,
+        asunto=f"Proforma {numero} · {empresa}",
+        html=armar_html(titulo, cuerpo, (f"{portal}/portal/pagos", "Ver mis proformas")),
+        adjuntos=[Adjunto(f"{numero}.pdf", pdf)] if pdf else [],
     )
 
 

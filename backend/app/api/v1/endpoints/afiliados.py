@@ -24,7 +24,9 @@ from app.schemas.afiliado import (
 )
 from app.schemas.common import Mensaje, Pagina
 from app.schemas.contacto import ContactoActualizar, ContactoOut
+from app.models.proforma import Proforma
 from app.services import correo
+from app.services.proformas import generar_pdf
 from app.services.afiliados import aplicar_contactos, construir_resumen
 
 router = APIRouter(prefix="/afiliados", tags=["afiliados"])
@@ -234,6 +236,19 @@ def enviar_recordatorio(afiliado_id: uuid.UUID, admin: Administrador, db: DbSess
     dias = (afiliado.fecha_vencimiento - date.today()).days if afiliado.fecha_vencimiento else None
     monto = f"RD$ {afiliado.cuota_anual:,.2f}" if afiliado.cuota_anual else None
 
+    # Si ya se le emitió una proforma que sigue sin pagar, va adjunta: el
+    # recordatorio sirve para que paguen, y el documento con la cuenta es
+    # justo lo que necesitan para hacerlo.
+    pendiente = db.scalar(
+        select(Proforma)
+        .where(Proforma.afiliado_id == afiliado.id, Proforma.pago_id.is_(None))
+        .order_by(Proforma.fecha_generacion.desc())
+        .limit(1)
+    )
+    adjunto = (
+        (pendiente.numero, generar_pdf(pendiente, afiliado).getvalue()) if pendiente else None
+    )
+
     enviado = correo.enviar(
         correo.recordatorio_vencimiento(
             para=destino,
@@ -241,6 +256,7 @@ def enviar_recordatorio(afiliado_id: uuid.UUID, admin: Administrador, db: DbSess
             vence=afiliado.fecha_vencimiento,
             dias=dias,
             monto=monto,
+            proforma=adjunto,
         )
     )
 

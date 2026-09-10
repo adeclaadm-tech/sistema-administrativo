@@ -2,7 +2,9 @@
 
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 
@@ -11,7 +13,7 @@ from app.models.afiliado import Afiliado
 from app.models.enums import RolUsuario
 from app.models.proforma import Proforma
 from app.schemas.proforma import ProformaCrear, ProformaOut
-from app.services import storage
+from app.services import correo, storage
 from app.services.proformas import crear_proforma, generar_pdf
 
 router = APIRouter(prefix="/proformas", tags=["proformas"])
@@ -52,7 +54,12 @@ def listar(_: Admin, db: DbSession, afiliado_id: uuid.UUID | None = None) -> lis
 @router.post(
     "", response_model=ProformaOut, status_code=status.HTTP_201_CREATED, summary="Emitir proforma"
 )
-def emitir(datos: ProformaCrear, admin: Administrador, db: DbSession) -> ProformaOut:
+def emitir(
+    datos: ProformaCrear,
+    admin: Administrador,
+    db: DbSession,
+    enviar: Annotated[bool, Query(description="Manda la proforma al afiliado por correo")] = True,
+) -> ProformaOut:
     afiliado = db.get(Afiliado, datos.afiliado_id)
     if afiliado is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Afiliado no encontrado.")
@@ -66,6 +73,22 @@ def emitir(datos: ProformaCrear, admin: Administrador, db: DbSession) -> Proform
     )
     db.commit()
     db.refresh(proforma)
+
+    # La proforma es un cobro: sirve de poco si se queda esperando a que el
+    # afiliado entre al portal por su cuenta. Va adjunta en PDF, que es lo que
+    # se reenvía a contabilidad.
+    if enviar and afiliado.email:
+        correo.enviar(
+            correo.proforma_emitida(
+                para=afiliado.email,
+                empresa=afiliado.nombre,
+                numero=proforma.numero,
+                monto=f"RD$ {proforma.monto or 0:,.2f}",
+                concepto=proforma.concepto or "la cuota de afiliación",
+                pdf=generar_pdf(proforma, afiliado).getvalue(),
+            )
+        )
+
     return _salida(proforma)
 
 
