@@ -74,6 +74,13 @@ export const token = {
 
 type Opciones = Omit<RequestInit, "body"> & { body?: unknown; query?: Record<string, unknown> };
 
+/** Rutas donde un 401 habla de las credenciales que acabas de escribir. */
+const RUTAS_DE_CREDENCIALES = ["/auth/login", "/auth/token", "/auth/register", "/auth/refresh"];
+
+function esRutaDeCredenciales(ruta: string): boolean {
+  return RUTAS_DE_CREDENCIALES.some((r) => ruta.startsWith(r));
+}
+
 /** Traduce el fallo de red al error de configuración que casi siempre es. */
 function mensajeDeRed(destino: string): string {
   const apuntaALocal = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(destino);
@@ -128,12 +135,6 @@ async function ejecutar<T>(ruta: string, opciones: Opciones = {}): Promise<T> {
     throw new ApiError(0, mensajeDeRed(destino), undefined, causa);
   }
 
-  if (respuesta.status === 401) {
-    token.clear();
-    // El guard de rutas se encarga de mandar al login; aquí solo cortamos.
-    throw new ApiError(401, "Tu sesión expiró. Vuelve a entrar.");
-  }
-
   if (!respuesta.ok) {
     let mensaje = "Algo falló del lado del servidor.";
     let errores;
@@ -144,6 +145,17 @@ async function ejecutar<T>(ruta: string, opciones: Opciones = {}): Promise<T> {
     } catch {
       /* respuesta sin cuerpo JSON */
     }
+
+    // Un 401 significa dos cosas distintas según dónde ocurra. Al intentar
+    // entrar es "credenciales incorrectas" y hay que mostrar lo que dijo el
+    // backend; en cualquier otra ruta es un token vencido, y ahí sí toca
+    // limpiar la sesión. Tratarlos igual convertía un login fallido en un
+    // "tu sesión expiró" que no le decía nada a nadie.
+    if (respuesta.status === 401 && !esRutaDeCredenciales(ruta)) {
+      token.clear();
+      mensaje = "Tu sesión expiró. Vuelve a entrar.";
+    }
+
     throw new ApiError(respuesta.status, mensaje, errores);
   }
 
