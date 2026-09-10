@@ -292,7 +292,9 @@ Los avisos salen por [Resend](https://resend.com). Tres momentos los disparan:
 | --- | --- | --- |
 | El staff aprueba o rechaza un documento | al correo del afiliado | qué documento, y el motivo si fue rechazo |
 | El staff registra un pago | al correo del afiliado | monto, período y número de proforma |
-| El staff pulsa "Enviar recordatorio" en la ficha | al contacto de contabilidad, o al correo general | cuánto falta para el vencimiento y la cuota |
+| El staff emite una proforma | al correo del afiliado | el cobro, con el PDF adjunto |
+| El staff pulsa "Enviar recordatorio" | al destinatario que elija | el plazo, la cuota, una nota opcional y la proforma pendiente adjunta |
+| La tanda diaria de recordatorios | a contabilidad de cada afiliado que toque | lo mismo, sin nota |
 
 Variables:
 
@@ -309,6 +311,29 @@ disparó — aprobar un documento se guarda aunque el aviso no salga.
 
 Mientras se verifica el dominio, `onboarding@resend.dev` funciona como
 remitente de prueba, pero solo entrega a la dirección dueña de la cuenta.
+
+#### Cuándo se avisa
+
+Un afiliado recibe el recordatorio **30 días antes** de vencer y, si dejó pasar
+la fecha, otra vez a los **7, 30 y 60 días después**. Los dos valores son
+configurables:
+
+| Variable | Valor |
+| --- | --- |
+| `DIAS_AVISO_VENCIMIENTO` | días antes del vencimiento — `30` |
+| `DIAS_AVISO_POSVENCIMIENTO` | días después, separados por coma — `7,30,60`; vacío lo desactiva |
+
+La comparación es contra el día exacto, no un rango: correr la tanda dos veces
+el mismo día reenvía a los mismos, y no arrastra a los del día anterior.
+
+El dashboard muestra a quién le toca hoy y permite mandarlos a mano. Para que
+salgan solos, agrega en Railway un **Cron Job** con el comando:
+
+```bash
+curl -fsS -X POST "$API_URL/api/v1/afiliados/recordatorios/enviar" -H "Authorization: Bearer $TOKEN_SERVICIO"
+```
+
+Mientras tanto funciona igual pulsando el botón del dashboard.
 
 ### Storage de documentos
 

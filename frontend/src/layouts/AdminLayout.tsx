@@ -9,6 +9,7 @@ const GESTION = [
   { a: "/admin", texto: "Dashboard", exacta: true },
   { a: "/admin/afiliados", texto: "Afiliados" },
   { a: "/admin/documentos", texto: "Documentos por revisar" },
+  { a: "/admin/proformas", texto: "Proformas" },
   { a: "/admin/pagos", texto: "Pagos" },
   { a: "/admin/reportes", texto: "Reportes" },
 ];

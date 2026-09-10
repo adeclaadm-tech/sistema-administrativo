@@ -52,6 +52,7 @@ def crear_proforma(
     concepto: str | None = None,
     pago_id: uuid.UUID | None = None,
     fecha_generacion: date | None = None,
+    periodo: int | None = None,
     subir_pdf: bool = True,
 ) -> Proforma:
     fecha_generacion = fecha_generacion or date.today()
@@ -60,8 +61,9 @@ def crear_proforma(
         pago_id=pago_id,
         numero=siguiente_numero(db, fecha_generacion.year),
         fecha_generacion=fecha_generacion,
+        periodo=periodo or fecha_generacion.year,
         monto=monto if monto is not None else afiliado.cuota_anual,
-        concepto=concepto or f"Cuota anual {fecha_generacion.year}",
+        concepto=concepto or f"Cuota anual {periodo or fecha_generacion.year}",
     )
     db.add(proforma)
     db.flush()

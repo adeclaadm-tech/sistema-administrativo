@@ -14,6 +14,12 @@ class Usuario(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "usuarios"
 
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    # Alternativa al correo para entrar. Opcional: las cuentas viejas y las
+    # que crea el staff no lo tienen, y varios nulos conviven bajo el índice
+    # único de Postgres.
+    usuario: Mapped[Optional[str]] = mapped_column(
+        String(60), unique=True, index=True, nullable=True
+    )
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     nombre: Mapped[str] = mapped_column(String(160), nullable=False)
 

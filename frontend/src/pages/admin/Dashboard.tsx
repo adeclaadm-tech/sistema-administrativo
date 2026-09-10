@@ -3,17 +3,25 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { Boton, Cargando, Metrica, Tarjeta, Vacio } from "../../components/ui";
-import { api } from "../../lib/api";
+import { Aviso, Boton, Cargando, Metrica, Tarjeta, Vacio } from "../../components/ui";
+import { ApiError, api } from "../../lib/api";
 import { TIPO_DOCUMENTO, moneyCorto } from "../../lib/format";
 import { useAuth } from "../../lib/auth";
-import type { DocumentoEnCola, Metricas } from "../../lib/types";
+import type {
+  CandidatoRecordatorio,
+  DocumentoEnCola,
+  Metricas,
+  ResumenEnvio,
+} from "../../lib/types";
 
 export default function DashboardAdmin() {
   const { puedeEscribir } = useAuth();
   const [metricas, setMetricas] = useState<Metricas | null>(null);
   const [cola, setCola] = useState<DocumentoEnCola[]>([]);
   const [revisando, setRevisando] = useState<string | null>(null);
+  const [tanda, setTanda] = useState<CandidatoRecordatorio[]>([]);
+  const [enviandoTanda, setEnviandoTanda] = useState(false);
+  const [avisoTanda, setAvisoTanda] = useState<string | null>(null);
 
   const cargar = useCallback(() => {
     api.get<Metricas>("/reportes/dashboard").then(setMetricas).catch(() => setMetricas(null));
@@ -21,7 +29,13 @@ export default function DashboardAdmin() {
       .get<DocumentoEnCola[]>("/documentos/cola", { limite: 6 })
       .then(setCola)
       .catch(() => setCola([]));
+    api
+      .get<CandidatoRecordatorio[]>("/afiliados/recordatorios/pendientes")
+      .then(setTanda)
+      .catch(() => setTanda([]));
   }, []);
+
+
 
   useEffect(cargar, [cargar]);
 
@@ -35,6 +49,23 @@ export default function DashboardAdmin() {
       cargar();
     } finally {
       setRevisando(null);
+    }
+  }
+
+  async function enviarTanda() {
+    setEnviandoTanda(true);
+    setAvisoTanda(null);
+    try {
+      const r = await api.post<ResumenEnvio>("/afiliados/recordatorios/enviar");
+      const partes = [`${r.enviados} enviados`];
+      if (r.sin_correo) partes.push(`${r.sin_correo} sin correo`);
+      if (r.fallidos) partes.push(`${r.fallidos} fallaron`);
+      setAvisoTanda(partes.join(" · "));
+      cargar();
+    } catch (e) {
+      setAvisoTanda(e instanceof ApiError ? e.message : "No se pudo enviar la tanda.");
+    } finally {
+      setEnviandoTanda(false);
     }
   }
 
@@ -188,6 +219,50 @@ export default function DashboardAdmin() {
                 </li>
               ))}
             </ul>
+          </Tarjeta>
+
+          <Tarjeta className="flex flex-col gap-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="font-heading text-xl">Recordatorios de hoy</h2>
+              <span className="cifra font-mono text-xs text-tinta-suave">{tanda.length}</span>
+            </div>
+
+            {tanda.length === 0 ? (
+              <p className="text-sm text-tinta-tenue">
+                Hoy no le toca aviso a nadie. Se manda 30 días antes del vencimiento, y a los 7, 30
+                y 60 días después.
+              </p>
+            ) : (
+              <>
+                <ul className="flex flex-col gap-2">
+                  {tanda.slice(0, 4).map((c) => (
+                    <li key={c.afiliado_id} className="flex flex-col gap-0.5">
+                      <Link
+                        to={`/admin/afiliados/${c.afiliado_id}`}
+                        className="text-sm hover:text-teal-boton"
+                      >
+                        {c.afiliado_nombre}
+                      </Link>
+                      <span className="text-xs text-tinta-tenue">
+                        {c.motivo}
+                        {c.email ? "" : " · sin correo"}
+                        {c.proforma ? ` · ${c.proforma}` : ""}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {tanda.length > 4 ? (
+                  <span className="text-xs text-tinta-tenue">y {tanda.length - 4} más</span>
+                ) : null}
+                {puedeEscribir ? (
+                  <Boton variante="contorno" cargando={enviandoTanda} onClick={() => void enviarTanda()}>
+                    {tanda.length === 1 ? "Enviar el recordatorio" : `Enviar los ${tanda.length}`}
+                  </Boton>
+                ) : null}
+              </>
+            )}
+
+            {avisoTanda ? <Aviso tono="teal">{avisoTanda}</Aviso> : null}
           </Tarjeta>
 
           <Tarjeta className="flex flex-col gap-2">

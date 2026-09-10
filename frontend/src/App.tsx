@@ -16,6 +16,7 @@ import Afiliados from "./pages/admin/Afiliados";
 import AfiliadoDetalle from "./pages/admin/AfiliadoDetalle";
 import DocumentosAdmin from "./pages/admin/Documentos";
 import PagosAdmin from "./pages/admin/Pagos";
+import ProformasAdmin from "./pages/admin/Proformas";
 import Reportes from "./pages/admin/Reportes";
 import Usuarios from "./pages/admin/Usuarios";
 
@@ -56,6 +57,7 @@ export default function App() {
             <Route path="afiliados" element={<Afiliados />} />
             <Route path="afiliados/:id" element={<AfiliadoDetalle />} />
             <Route path="documentos" element={<DocumentosAdmin />} />
+            <Route path="proformas" element={<ProformasAdmin />} />
             <Route path="pagos" element={<PagosAdmin />} />
             <Route path="reportes" element={<Reportes />} />
             <Route path="usuarios" element={<Usuarios />} />

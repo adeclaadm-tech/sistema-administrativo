@@ -178,6 +178,7 @@ def recordatorio_vencimiento(
     dias: int | None,
     monto: str | None,
     proforma: tuple[str, bytes] | None = None,
+    nota: str | None = None,
 ) -> Mensaje:
     portal = settings.FRONTEND_URL.rstrip("/")
 
@@ -209,6 +210,14 @@ def recordatorio_vencimiento(
         "soporte de pago y revisar el estado de tus documentos.</p>"
     )
 
+    # Nota que escribe el staff para este envío concreto: acuerdos de pago,
+    # aclaraciones, lo que haga falta. Va destacada para que no se pierda.
+    if nota:
+        cuerpo += (
+            "<p style='margin:0 0 12px;padding:12px 14px;background:#eef5f4;"
+            f"border-radius:8px;'>{nota}</p>"
+        )
+
     if proforma:
         cuerpo += (
             f"<p style='margin:0 0 12px;'>Va adjunta la proforma "
@@ -238,9 +247,10 @@ def proforma_emitida(
         f"<p style='margin:0 0 12px;'>Emitimos la proforma <strong>{numero}</strong> a nombre de "
         f"{empresa} por {concepto.lower()}.</p>"
         f"<p style='margin:0 0 12px;'>Monto a pagar: <strong>{monto}</strong>.</p>"
-        "<p style='margin:0 0 12px;'>La adjuntamos en PDF, con los datos de la cuenta para la "
-        "transferencia. Cuando pagues, sube el comprobante desde el portal para que quede "
-        "registrado.</p>"
+        "<p style='margin:0 0 12px;'>Ya está disponible en tu portal y va adjunta en PDF, "
+        "con los datos de la cuenta para la transferencia.</p>"
+        "<p style='margin:0 0 12px;'>Cuando pagues, sube el comprobante desde el portal: "
+        "la opción de subir el soporte de pago se habilita con esta proforma.</p>"
     )
     return Mensaje(
         para=para,

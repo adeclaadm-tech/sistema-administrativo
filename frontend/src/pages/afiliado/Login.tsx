@@ -85,10 +85,11 @@ export default function Login() {
           {pestana === "entrar" ? (
             <>
               <Campo
-                etiqueta="RNC / Cédula o correo"
+                etiqueta="Correo, usuario o RNC"
                 name="identificador"
                 autoComplete="username"
-                placeholder="1-31-45678-9"
+                placeholder="tu@empresa.do"
+                ayuda="También sirve tu nombre de usuario o el RNC de la empresa."
                 required
               />
               <Campo
@@ -115,6 +116,14 @@ export default function Login() {
               <Campo etiqueta="RNC / Cédula" name="rnc_cedula" placeholder="1-31-45678-9" required />
               <Campo etiqueta="Representante" name="representante" placeholder="Julio Morales" required />
               <Campo etiqueta="Correo" name="email" type="email" autoComplete="email" required />
+              <Campo
+                etiqueta="Nombre de usuario"
+                name="usuario"
+                placeholder="constructora-bavaro"
+                pattern="[a-zA-Z0-9._-]+"
+                minLength={3}
+                ayuda="Opcional. Te sirve para entrar sin escribir el correo."
+              />
               <Campo etiqueta="Teléfono" name="telefono" placeholder="809-552-0114" />
               <Campo
                 etiqueta="Contraseña"

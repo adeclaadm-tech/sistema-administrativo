@@ -80,6 +80,9 @@ class Settings(BaseSettings):
     CUOTA_ANUAL_DEFAULT: float = 45000.00
     MONEDA: str = "DOP"
     DIAS_AVISO_VENCIMIENTO: int = 30
+    # Días DESPUÉS del vencimiento en los que se vuelve a insistir, separados
+    # por coma. Vacío desactiva el seguimiento posterior.
+    DIAS_AVISO_POSVENCIMIENTO: str = "7,30,60"
 
     @field_validator("DATABASE_URL")
     @classmethod

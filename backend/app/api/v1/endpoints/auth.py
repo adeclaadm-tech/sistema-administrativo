@@ -30,16 +30,24 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 CREDENCIALES = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Correo, RNC o contraseña incorrectos.",
+    detail="Correo, usuario, RNC o contraseña incorrectos.",
     headers={"WWW-Authenticate": "Bearer"},
 )
 
 
 def _buscar_usuario(db, identificador: str) -> Usuario | None:
-    """Acepta correo o RNC. El constructor recuerda su RNC, no siempre el correo
-    con el que lo registraron."""
+    """Acepta correo, nombre de usuario o RNC.
+
+    El representante de una constructora no siempre recuerda con qué correo lo
+    dieron de alta, pero sí su usuario o el RNC de la empresa.
+    """
     ident = identificador.strip().lower()
+
     usuario = db.scalar(select(Usuario).where(func.lower(Usuario.email) == ident))
+    if usuario:
+        return usuario
+
+    usuario = db.scalar(select(Usuario).where(func.lower(Usuario.usuario) == ident))
     if usuario:
         return usuario
     afiliado = db.scalar(
@@ -105,8 +113,19 @@ def registrar(datos: RegistroAfiliadoRequest, db: DbSession) -> TokenPair:
             detail="Este RNC ya está registrado. Recupera tu contraseña o escríbele a ADECLA.",
         )
 
+    if datos.usuario:
+        nombre_usuario = datos.usuario.strip().lower()
+        if db.scalar(select(Usuario).where(func.lower(Usuario.usuario) == nombre_usuario)):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ese nombre de usuario ya está tomado. Prueba con otro.",
+            )
+    else:
+        nombre_usuario = None
+
     usuario = Usuario(
         email=email,
+        usuario=nombre_usuario,
         password_hash=hash_password(datos.password),
         nombre=datos.representante,
         rol=RolUsuario.AFILIADO,

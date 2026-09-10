@@ -16,6 +16,7 @@ from app.core.deps import Admin, Administrador, DbSession, UsuarioActual
 from app.models.afiliado import Afiliado
 from app.models.documento import Documento
 from app.models.enums import EstadoDocumento, RolUsuario, TipoDocumento
+from app.models.proforma import Proforma
 from app.models.usuario import Usuario
 from app.schemas.common import Mensaje, Pagina
 from app.schemas.documento import (
@@ -91,6 +92,25 @@ async def subir(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail="Solo aceptamos PDF, JPG o PNG.",
         )
+
+    # El comprobante se sube contra un cobro concreto: sin proforma emitida no
+    # hay nada que soportar, y el staff recibiría un archivo suelto que no sabe
+    # a qué período aplicar.
+    if tipo == TipoDocumento.SOPORTE_PAGO:
+        pendiente = db.scalar(
+            select(Proforma).where(
+                Proforma.afiliado_id == afiliado.id, Proforma.pago_id.is_(None)
+            )
+        )
+        if pendiente is None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Todavía no tienes una proforma pendiente de pago. ADECLA te la envía "
+                    "por correo cuando corresponde renovar; cuando llegue, sube aquí el "
+                    "comprobante."
+                ),
+            )
 
     contenido = await archivo.read()
     limite = settings.MAX_UPLOAD_MB * 1024 * 1024

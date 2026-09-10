@@ -12,6 +12,7 @@ export type MetodoPago = "transferencia" | "cheque" | "efectivo" | "tarjeta" | "
 export interface Usuario {
   id: string;
   email: string;
+  usuario: string | null;
   nombre: string;
   rol: Rol;
   sub_rol: SubRol | null;
@@ -121,6 +122,8 @@ export interface Pago {
 export interface Proforma {
   id: string;
   afiliado_id: string;
+  afiliado_nombre: string | null;
+  periodo: number | null;
   pago_id: string | null;
   numero: string;
   fecha_generacion: string;
@@ -178,4 +181,28 @@ export interface Pagina<T> {
   total: number;
   page: number;
   per_page: number;
+}
+
+export interface DestinatarioPosible {
+  destino: string;
+  etiqueta: string;
+  email: string | null;
+  area: AreaContacto | null;
+}
+
+export interface CandidatoRecordatorio {
+  afiliado_id: string;
+  afiliado_nombre: string;
+  email: string | null;
+  fecha_vencimiento: string | null;
+  dias: number | null;
+  motivo: string;
+  proforma: string | null;
+}
+
+export interface ResumenEnvio {
+  enviados: number;
+  sin_correo: number;
+  fallidos: number;
+  detalle: string[];
 }

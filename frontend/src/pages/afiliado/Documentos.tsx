@@ -5,12 +5,14 @@ import { useEffect, useRef, useState } from "react";
 import { Aviso, Boton, Cargando, DocumentoBadge, Tarjeta } from "../../components/ui";
 import { ApiError, api } from "../../lib/api";
 import { PISTA_DOCUMENTO, TIPO_DOCUMENTO, fecha, pesoArchivo } from "../../lib/format";
-import type { Documento, TipoDocumento } from "../../lib/types";
+import type { Documento, Proforma, TipoDocumento } from "../../lib/types";
 
 const REQUERIDOS: TipoDocumento[] = ["rnc_nid", "cedula", "soporte_pago", "doc_representante"];
 
 export default function Documentos() {
   const [documentos, setDocumentos] = useState<Documento[] | null>(null);
+  // El soporte de pago solo se puede subir contra una proforma emitida.
+  const [proformas, setProformas] = useState<Proforma[]>([]);
   const [subiendo, setSubiendo] = useState<TipoDocumento | null>(null);
   const [error, setError] = useState<string | null>(null);
   const referencias = useRef<Record<string, HTMLInputElement | null>>({});
@@ -20,6 +22,7 @@ export default function Documentos() {
 
   useEffect(() => {
     void cargar();
+    api.get<Proforma[]>("/proformas/me").then(setProformas).catch(() => setProformas([]));
   }, []);
 
   async function subir(tipo: TipoDocumento, archivo: File) {
@@ -41,6 +44,7 @@ export default function Documentos() {
   if (!documentos) return <Cargando />;
 
   const porTipo = new Map(documentos.map((d) => [d.tipo, d]));
+  const proformaPendiente = proformas.find((p) => !p.pago_id) ?? null;
   const rechazados = documentos.filter((d) => d.estado === "rechazado");
   const pendientes = documentos.filter((d) => d.estado === "pendiente");
 
@@ -77,6 +81,9 @@ export default function Documentos() {
         {REQUERIDOS.map((tipo) => {
           const doc = porTipo.get(tipo);
           const esteSubiendo = subiendo === tipo;
+          // Sin proforma emitida no hay cobro que soportar: el comprobante
+          // llegaría sin período al que aplicarlo.
+          const bloqueado = tipo === "soporte_pago" && !proformaPendiente;
 
           return (
             <Tarjeta
@@ -101,12 +108,28 @@ export default function Documentos() {
                     ? `${doc.nombre_archivo ?? "archivo"} · ${pesoArchivo(doc.tamano_bytes)} · subido ${fecha(doc.fecha_subida)}`
                     : "Sin archivo"}
                 </span>
+                {bloqueado ? (
+                  <span className="text-xs text-tinta-tenue">
+                    Se habilita cuando ADECLA emita tu proforma de pago.
+                  </span>
+                ) : null}
+                {tipo === "soporte_pago" && proformaPendiente ? (
+                  <span className="text-xs text-tinta-suave">
+                    Corresponde a la proforma {proformaPendiente.numero}.
+                  </span>
+                ) : null}
                 {doc?.estado === "rechazado" && doc.motivo_rechazo ? (
                   <span className="text-xs text-vencido">{doc.motivo_rechazo}</span>
                 ) : null}
               </div>
 
-              {doc ? <DocumentoBadge estado={doc.estado} /> : null}
+              {doc ? (
+                <DocumentoBadge estado={doc.estado} />
+              ) : (
+                <span className="inline-flex rounded-md bg-borde px-2.5 py-1 text-[0.68rem] font-semibold tracking-[0.07em] text-tinta-suave uppercase">
+                  Sin subir
+                </span>
+              )}
 
               <input
                 ref={(el) => {
@@ -124,6 +147,7 @@ export default function Documentos() {
               <Boton
                 variante={doc ? "fantasma" : "primario"}
                 cargando={esteSubiendo}
+                disabled={bloqueado}
                 onClick={() => referencias.current[tipo]?.click()}
               >
                 {doc ? "Reemplazar" : "Subir archivo"}

@@ -9,8 +9,8 @@ from app.schemas.usuario import UsuarioOut
 class LoginRequest(BaseModel):
     """Login por JSON.
 
-    El portal de afiliados deja entrar con RNC o con correo, así que el campo
-    se llama `identificador` y no `email`. La ruta OAuth2 estándar
+    El portal deja entrar con correo, nombre de usuario o RNC, así que el
+    campo se llama `identificador` y no `email`. La ruta OAuth2 estándar
     (`/auth/token`, form-urlencoded) sigue existiendo para Swagger.
     """
 
@@ -40,6 +40,8 @@ class RegistroAfiliadoRequest(BaseModel):
     """
 
     email: EmailStr
+    # Opcional: quien prefiera entrar con un usuario corto en vez del correo.
+    usuario: str | None = Field(None, min_length=3, max_length=60, pattern=r"^[a-zA-Z0-9._-]+$")
     password: str = Field(min_length=8, max_length=128)
     nombre_empresa: str = Field(min_length=2, max_length=200)
     rnc_cedula: str = Field(min_length=5, max_length=32)

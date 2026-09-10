@@ -25,7 +25,13 @@ from app.schemas.afiliado import (
 from app.schemas.common import Mensaje, Pagina
 from app.schemas.contacto import ContactoActualizar, ContactoOut
 from app.models.proforma import Proforma
-from app.services import correo
+from app.schemas.recordatorio import (
+    CandidatoRecordatorio,
+    DestinatarioPosible,
+    RecordatorioRequest,
+    ResumenEnvio,
+)
+from app.services import correo, recordatorios
 from app.services.proformas import generar_pdf
 from app.services.afiliados import aplicar_contactos, construir_resumen
 
@@ -135,6 +141,64 @@ def listar(
     )
 
 
+@router.get(
+    "/recordatorios/pendientes",
+    response_model=list[CandidatoRecordatorio],
+    summary="A quién le toca recordatorio hoy",
+)
+def recordatorios_de_hoy(_: Admin, db: DbSession) -> list[CandidatoRecordatorio]:
+    """Preview de la tanda: se puede mirar antes de mandarla."""
+    return recordatorios.candidatos(db)
+
+
+@router.post(
+    "/recordatorios/enviar",
+    response_model=ResumenEnvio,
+    summary="Mandar la tanda de recordatorios de hoy",
+)
+def enviar_tanda(admin: Administrador, db: DbSession) -> ResumenEnvio:
+    """Pensado para un cron diario, y también para dispararlo a mano.
+
+    Cubre las dos ventanas: los que vencen dentro de X días y los que ya
+    vencieron hace 7, 30 o 60 —lo que diga DIAS_AVISO_POSVENCIMIENTO—. Se
+    compara contra el día exacto, así que correrlo dos veces el mismo día
+    reenvía a los mismos, no a otros.
+    """
+    resumen = ResumenEnvio()
+
+    for candidato in recordatorios.candidatos(db):
+        if not candidato.email:
+            resumen.sin_correo += 1
+            resumen.detalle.append(f"{candidato.afiliado_nombre}: sin correo")
+            continue
+
+        afiliado = db.get(Afiliado, candidato.afiliado_id)
+        pendiente = recordatorios.proforma_pendiente(db, afiliado)
+        adjunto = (
+            (pendiente.numero, generar_pdf(pendiente, afiliado).getvalue())
+            if pendiente
+            else None
+        )
+
+        ok = correo.enviar(
+            correo.recordatorio_vencimiento(
+                para=candidato.email,
+                empresa=afiliado.nombre,
+                vence=afiliado.fecha_vencimiento,
+                dias=candidato.dias,
+                monto=f"RD$ {afiliado.cuota_anual:,.2f}" if afiliado.cuota_anual else None,
+                proforma=adjunto,
+            )
+        )
+        if ok:
+            resumen.enviados += 1
+        else:
+            resumen.fallidos += 1
+            resumen.detalle.append(f"{afiliado.nombre}: el envío falló")
+
+    return resumen
+
+
 @router.post(
     "", response_model=AfiliadoOut, status_code=status.HTTP_201_CREATED, summary="Crear afiliado"
 )
@@ -213,41 +277,46 @@ def actualizar(
     return AfiliadoOut.model_validate(afiliado)
 
 
+@router.get(
+    "/{afiliado_id}/recordatorio",
+    response_model=list[DestinatarioPosible],
+    summary="A quién se le puede mandar el recordatorio",
+)
+def opciones_recordatorio(
+    afiliado_id: uuid.UUID, _: Admin, db: DbSession
+) -> list[DestinatarioPosible]:
+    """El panel lo usa para mostrar las direcciones antes de enviar nada."""
+    return recordatorios.destinatarios(_obtener(db, afiliado_id))
+
+
 @router.post(
     "/{afiliado_id}/recordatorio",
     response_model=Mensaje,
     summary="Enviar recordatorio de vencimiento",
 )
-def enviar_recordatorio(afiliado_id: uuid.UUID, admin: Administrador, db: DbSession) -> Mensaje:
+def enviar_recordatorio(
+    afiliado_id: uuid.UUID,
+    datos: RecordatorioRequest,
+    admin: Administrador,
+    db: DbSession,
+) -> Mensaje:
     afiliado = _obtener(db, afiliado_id)
 
-    # Se prefiere el contacto de contabilidad: es quien paga. Si no hay, el
-    # correo general de la empresa.
-    contable = next(
-        (c for c in afiliado.contactos if c.area == AreaContacto.CONTABILIDAD and c.email), None
-    )
-    destino = (contable.email if contable else None) or afiliado.email
+    destino = recordatorios.resolver_email(afiliado, datos.destino, datos.email)
     if not destino:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Este afiliado no tiene correo. Agrégalo en la ficha o en sus contactos.",
+            detail="No hay a quién mandarlo. Agrega un correo en la ficha o en sus contactos.",
         )
 
     dias = (afiliado.fecha_vencimiento - date.today()).days if afiliado.fecha_vencimiento else None
     monto = f"RD$ {afiliado.cuota_anual:,.2f}" if afiliado.cuota_anual else None
 
-    # Si ya se le emitió una proforma que sigue sin pagar, va adjunta: el
-    # recordatorio sirve para que paguen, y el documento con la cuenta es
-    # justo lo que necesitan para hacerlo.
-    pendiente = db.scalar(
-        select(Proforma)
-        .where(Proforma.afiliado_id == afiliado.id, Proforma.pago_id.is_(None))
-        .order_by(Proforma.fecha_generacion.desc())
-        .limit(1)
-    )
-    adjunto = (
-        (pendiente.numero, generar_pdf(pendiente, afiliado).getvalue()) if pendiente else None
-    )
+    adjunto = None
+    if datos.adjuntar_proforma:
+        pendiente = recordatorios.proforma_pendiente(db, afiliado)
+        if pendiente:
+            adjunto = (pendiente.numero, generar_pdf(pendiente, afiliado).getvalue())
 
     enviado = correo.enviar(
         correo.recordatorio_vencimiento(
@@ -257,6 +326,7 @@ def enviar_recordatorio(afiliado_id: uuid.UUID, admin: Administrador, db: DbSess
             dias=dias,
             monto=monto,
             proforma=adjunto,
+            nota=datos.nota,
         )
     )
 
@@ -265,7 +335,9 @@ def enviar_recordatorio(afiliado_id: uuid.UUID, admin: Administrador, db: DbSess
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="El correo no salió. Revisa que RESEND_API_KEY esté configurada.",
         )
-    return Mensaje(detail=f"Recordatorio enviado a {destino}.")
+
+    cola = f" con la proforma {adjunto[0]} adjunta" if adjunto else ""
+    return Mensaje(detail=f"Recordatorio enviado a {destino}{cola}.")
 
 
 @router.delete("/{afiliado_id}", response_model=Mensaje, summary="Eliminar afiliado")

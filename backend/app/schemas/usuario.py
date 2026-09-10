@@ -40,6 +40,7 @@ class CambiarPassword(BaseModel):
 class UsuarioOut(ORMModel):
     id: uuid.UUID
     email: EmailStr
+    usuario: str | None = None
     nombre: str
     rol: RolUsuario
     sub_rol: SubRolAdmin | None = None

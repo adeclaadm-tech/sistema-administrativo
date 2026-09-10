@@ -15,6 +15,8 @@ import {
 } from "../../components/ui";
 import { ApiError, api } from "../../lib/api";
 import EditarAfiliado from "../../components/EditarAfiliado";
+import EmitirProforma from "../../components/EmitirProforma";
+import RecordatorioPanel from "../../components/RecordatorioPanel";
 import {
   AREA_CONTACTO,
   categoriaTexto,
@@ -45,8 +47,8 @@ export default function AfiliadoDetalle() {
   const [proformas, setProformas] = useState<Proforma[]>([]);
   const [formularioPago, setFormularioPago] = useState(false);
   const [editando, setEditando] = useState(false);
-  const [enviandoAviso, setEnviandoAviso] = useState(false);
-  const [emitiendo, setEmitiendo] = useState(false);
+  const [recordando, setRecordando] = useState(false);
+  const [emitiendoProforma, setEmitiendoProforma] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -80,38 +82,6 @@ export default function AfiliadoDetalle() {
       cargar();
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "No se pudo guardar la revisión.");
-    }
-  }
-
-  async function emitirProforma() {
-    setEmitiendo(true);
-    setError(null);
-    setMensaje(null);
-    try {
-      const p = await api.post<Proforma>("/proformas", {
-        afiliado_id: id,
-        monto: afiliado?.cuota_anual ?? null,
-      });
-      setMensaje(`Proforma ${p.numero} emitida. Ya puede descargarla el afiliado.`);
-      cargar();
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "No se pudo emitir la proforma.");
-    } finally {
-      setEmitiendo(false);
-    }
-  }
-
-  async function enviarRecordatorio() {
-    setEnviandoAviso(true);
-    setError(null);
-    setMensaje(null);
-    try {
-      const r = await api.post<{ detail: string }>(`/afiliados/${id}/recordatorio`);
-      setMensaje(r.detail);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "No se pudo enviar el recordatorio.");
-    } finally {
-      setEnviandoAviso(false);
     }
   }
 
@@ -181,15 +151,26 @@ export default function AfiliadoDetalle() {
         </div>
         {puedeEscribir ? (
           <div className="flex gap-2">
-            <Boton variante="contorno" cargando={emitiendo} onClick={() => void emitirProforma()}>
-              Emitir proforma
+            <Boton
+              variante="contorno"
+              onClick={() => {
+                setEmitiendoProforma((v) => !v);
+                setEditando(false);
+                setFormularioPago(false);
+              }}
+            >
+              {emitiendoProforma ? "Cerrar" : "Emitir proforma"}
             </Boton>
             <Boton
               variante="contorno"
-              cargando={enviandoAviso}
-              onClick={() => void enviarRecordatorio()}
+              onClick={() => {
+                setRecordando((v) => !v);
+                setEditando(false);
+                setFormularioPago(false);
+                setEmitiendoProforma(false);
+              }}
             >
-              Enviar recordatorio
+              {recordando ? "Cerrar" : "Enviar recordatorio"}
             </Boton>
             <Boton
               variante="contorno"
@@ -211,6 +192,31 @@ export default function AfiliadoDetalle() {
 
       {mensaje ? <Aviso tono="teal">{mensaje}</Aviso> : null}
       {error ? <Aviso tono="vencido">{error}</Aviso> : null}
+
+      {recordando && puedeEscribir ? (
+        <RecordatorioPanel
+          afiliado={afiliado}
+          proformaPendiente={proformasPendientes[0] ?? null}
+          onCancelar={() => setRecordando(false)}
+          onEnviado={(detalle) => {
+            setRecordando(false);
+            setMensaje(detalle);
+          }}
+        />
+      ) : null}
+
+      {emitiendoProforma && puedeEscribir ? (
+        <EmitirProforma
+          afiliado={afiliado}
+          pendientes={proformasPendientes}
+          onCancelar={() => setEmitiendoProforma(false)}
+          onEmitida={(p) => {
+            setEmitiendoProforma(false);
+            setMensaje(`Proforma ${p.numero} emitida. El afiliado ya puede descargarla.`);
+            cargar();
+          }}
+        />
+      ) : null}
 
       {editando && puedeEscribir ? (
         <EditarAfiliado

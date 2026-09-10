@@ -1,6 +1,7 @@
 """Proformas: numeración consecutiva y PDF descargable."""
 
 import uuid
+from datetime import date
 
 from typing import Annotated
 
@@ -19,8 +20,10 @@ from app.services.proformas import crear_proforma, generar_pdf
 router = APIRouter(prefix="/proformas", tags=["proformas"])
 
 
-def _salida(p: Proforma) -> ProformaOut:
+def _salida(p: Proforma, *, con_afiliado: bool = False) -> ProformaOut:
     salida = ProformaOut.model_validate(p)
+    if con_afiliado:
+        salida.afiliado_nombre = p.afiliado.nombre
     if p.pdf_url:
         try:
             salida.url = storage.url_publica(p.pdf_url)
@@ -44,11 +47,23 @@ def mis_proformas(usuario: UsuarioActual, db: DbSession) -> list[ProformaOut]:
 
 
 @router.get("", response_model=list[ProformaOut], summary="Listar proformas")
-def listar(_: Admin, db: DbSession, afiliado_id: uuid.UUID | None = None) -> list[ProformaOut]:
+def listar(
+    _: Admin,
+    db: DbSession,
+    afiliado_id: uuid.UUID | None = None,
+    periodo: int | None = None,
+    pagadas: Annotated[bool | None, Query(description="true=saldadas, false=pendientes")] = None,
+) -> list[ProformaOut]:
     consulta = select(Proforma).order_by(Proforma.fecha_generacion.desc())
     if afiliado_id:
         consulta = consulta.where(Proforma.afiliado_id == afiliado_id)
-    return [_salida(p) for p in db.scalars(consulta).all()]
+    if periodo:
+        consulta = consulta.where(Proforma.periodo == periodo)
+    if pagadas is True:
+        consulta = consulta.where(Proforma.pago_id.is_not(None))
+    elif pagadas is False:
+        consulta = consulta.where(Proforma.pago_id.is_(None))
+    return [_salida(p, con_afiliado=True) for p in db.scalars(consulta).all()]
 
 
 @router.post(
@@ -59,10 +74,32 @@ def emitir(
     admin: Administrador,
     db: DbSession,
     enviar: Annotated[bool, Query(description="Manda la proforma al afiliado por correo")] = True,
+    forzar: Annotated[bool, Query(description="Emite otra aunque ya haya una sin pagar")] = False,
 ) -> ProformaOut:
     afiliado = db.get(Afiliado, datos.afiliado_id)
     if afiliado is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Afiliado no encontrado.")
+    periodo = datos.periodo or (datos.fecha_generacion or date.today()).year
+
+    # Pulsar dos veces "Emitir proforma" creaba dos documentos válidos para la
+    # misma cuota, cada uno con su número. Si ya hay una sin pagar para ese
+    # período se devuelve esa, en vez de duplicar el cobro.
+    existente = db.scalar(
+        select(Proforma).where(
+            Proforma.afiliado_id == afiliado.id,
+            Proforma.periodo == periodo,
+            Proforma.pago_id.is_(None),
+        )
+    )
+    if existente is not None and not forzar:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"Ya existe la proforma {existente.numero} sin pagar para el período "
+                f"{periodo}. Reenvíala o anúlala antes de emitir otra."
+            ),
+        )
+
     proforma = crear_proforma(
         db,
         afiliado=afiliado,
@@ -70,6 +107,7 @@ def emitir(
         concepto=datos.concepto,
         pago_id=datos.pago_id,
         fecha_generacion=datos.fecha_generacion,
+        periodo=periodo,
     )
     db.commit()
     db.refresh(proforma)

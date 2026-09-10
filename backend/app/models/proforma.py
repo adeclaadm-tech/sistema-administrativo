@@ -3,7 +3,7 @@ from datetime import date
 from decimal import Decimal
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Date, ForeignKey, Numeric, String, Text
+from sqlalchemy import Date, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -35,6 +35,9 @@ class Proforma(Base, UUIDMixin, TimestampMixin):
 
     numero: Mapped[str] = mapped_column(String(40), unique=True, index=True, nullable=False)
     fecha_generacion: Mapped[date] = mapped_column(Date, nullable=False)
+    # Año que cubre el cobro. Va aparte del concepto porque es lo que
+    # permite detectar que ya se emitió una proforma para ese período.
+    periodo: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
     monto: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
     concepto: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     pdf_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
