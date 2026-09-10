@@ -11,6 +11,7 @@ from app.core.deps import Admin, Administrador, DbSession, UsuarioActual
 from app.models.afiliado import Afiliado
 from app.models.enums import EstadoAfiliado, RolUsuario
 from app.models.pago import Pago
+from app.models.proforma import Proforma
 from app.schemas.common import Mensaje, Pagina
 from app.schemas.pago import PagoActualizar, PagoConProformaOut, PagoCrear, PagoOut
 from app.services import correo
@@ -96,7 +97,20 @@ def registrar(
     db.flush()
 
     proforma = None
-    if datos.generar_proforma:
+    if datos.proforma_id:
+        proforma = db.get(Proforma, datos.proforma_id)
+        if proforma is None or proforma.afiliado_id != afiliado.id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Esa proforma no existe o es de otro afiliado.",
+            )
+        if proforma.pago_id is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"La proforma {proforma.numero} ya está saldada por otro pago.",
+            )
+        proforma.pago_id = pago.id
+    elif datos.generar_proforma:
         proforma = crear_proforma(
             db,
             afiliado=afiliado,

@@ -63,6 +63,19 @@ class Settings(BaseSettings):
     # frontend, no a la API.
     FRONTEND_URL: str = "http://localhost:5173"
 
+    # --- Datos de la asociación (cabecera y pie de la proforma) ---
+    # Salen de la factura proforma que ADECLA emite hoy. Van por entorno para
+    # poder corregir una dirección o una cuenta sin tocar el código.
+    ORG_DIRECCION: str = (
+        "Boulevar 1ro. De Noviembre|Edificio Cedro, Suite 1002P|"
+        "Punta Cana Village, Punta Cana, Rep. Dom."
+    )
+    ORG_RNC: str = "430134309"
+    BANCO_NOMBRE: str = "Banco Popular"
+    BANCO_TIPO_CUENTA: str = "Cuenta corriente"
+    BANCO_CUENTA: str = "782705941"
+    BANCO_TITULAR: str = "ADECLA"
+
     # --- Reglas de negocio ---
     CUOTA_ANUAL_DEFAULT: float = 45000.00
     MONEDA: str = "DOP"
@@ -101,6 +114,10 @@ class Settings(BaseSettings):
         if self.CORS_ORIGINS.strip() == "*":
             return ["*"]
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+
+    @property
+    def direccion_lineas(self) -> list[str]:
+        return [l.strip() for l in self.ORG_DIRECCION.split("|") if l.strip()]
 
     @property
     def correo_configurado(self) -> bool:

@@ -20,8 +20,12 @@ class PagoCrear(BaseModel):
     comprobante_url: str | None = None
     notas: str | None = None
     moneda: str = Field("DOP", min_length=3, max_length=3)
-    # Emite la proforma en el mismo paso; es lo que espera el staff al cobrar.
-    generar_proforma: bool = True
+    # Proforma que este pago liquida. Es el caso normal: la proforma se emitió
+    # antes para que el afiliado supiera cuánto y a dónde pagar.
+    proforma_id: uuid.UUID | None = None
+    # Solo para cobros que entraron sin proforma previa (efectivo en
+    # ventanilla, por ejemplo): la emite después, ya saldada.
+    generar_proforma: bool = False
     # Empuja el vencimiento del afiliado un año hacia adelante y lo activa.
     renovar_afiliacion: bool = False
 

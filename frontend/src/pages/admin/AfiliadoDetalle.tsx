@@ -46,6 +46,7 @@ export default function AfiliadoDetalle() {
   const [formularioPago, setFormularioPago] = useState(false);
   const [editando, setEditando] = useState(false);
   const [enviandoAviso, setEnviandoAviso] = useState(false);
+  const [emitiendo, setEmitiendo] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -82,6 +83,24 @@ export default function AfiliadoDetalle() {
     }
   }
 
+  async function emitirProforma() {
+    setEmitiendo(true);
+    setError(null);
+    setMensaje(null);
+    try {
+      const p = await api.post<Proforma>("/proformas", {
+        afiliado_id: id,
+        monto: afiliado?.cuota_anual ?? null,
+      });
+      setMensaje(`Proforma ${p.numero} emitida. Ya puede descargarla el afiliado.`);
+      cargar();
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "No se pudo emitir la proforma.");
+    } finally {
+      setEmitiendo(false);
+    }
+  }
+
   async function enviarRecordatorio() {
     setEnviandoAviso(true);
     setError(null);
@@ -111,7 +130,8 @@ export default function AfiliadoDetalle() {
           referencia: datos.referencia || null,
           concepto: datos.concepto || null,
           periodo: datos.periodo ? Number(datos.periodo) : null,
-          generar_proforma: true,
+          proforma_id: datos.proforma_id || null,
+          generar_proforma: !datos.proforma_id,
           renovar_afiliacion: datos.renovar === "on",
         },
       );
@@ -132,6 +152,8 @@ export default function AfiliadoDetalle() {
   if (!afiliado) return <Cargando />;
 
   const proformaDe = new Map(proformas.filter((p) => p.pago_id).map((p) => [p.pago_id, p]));
+  // Las que todavía nadie pagó: son las que un pago puede saldar.
+  const proformasPendientes = proformas.filter((p) => !p.pago_id);
   const porRevisar = documentos.filter((d) => d.estado === "pendiente").length;
   const contactos = new Map(afiliado.contactos.map((c) => [c.area, c]));
 
@@ -159,6 +181,9 @@ export default function AfiliadoDetalle() {
         </div>
         {puedeEscribir ? (
           <div className="flex gap-2">
+            <Boton variante="contorno" cargando={emitiendo} onClick={() => void emitirProforma()}>
+              Emitir proforma
+            </Boton>
             <Boton
               variante="contorno"
               cargando={enviandoAviso}
@@ -238,6 +263,17 @@ export default function AfiliadoDetalle() {
                 defaultValue={new Date().getFullYear()}
               />
               <Campo etiqueta="Concepto" name="concepto" placeholder="Cuota anual" />
+              <label className="flex flex-col gap-1.5">
+                <span className="etiqueta">Proforma que salda</span>
+                <select name="proforma_id" className="campo" defaultValue="">
+                  <option value="">Ninguna · emitir una nueva</option>
+                  {proformasPendientes.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.numero} · {money(p.monto)}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
 
             <label className="flex items-center gap-2 text-sm text-tinta-suave">
