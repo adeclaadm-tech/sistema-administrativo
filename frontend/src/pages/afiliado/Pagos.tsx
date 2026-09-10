@@ -57,7 +57,7 @@ export default function Pagos() {
           {porPagar.length === 1
             ? "Tienes una proforma pendiente de pago."
             : `Tienes ${porPagar.length} proformas pendientes de pago.`}{" "}
-          Descarga el PDF —trae los datos de la cuenta— y cuando pagues sube el comprobante desde
+          Descarga el PDF y una vez la proforma este pagada se sube el comprobante desde
           Documentos.
         </Aviso>
       ) : null}
