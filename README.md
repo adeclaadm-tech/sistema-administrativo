@@ -44,8 +44,10 @@ Usuario ──1:1── Afiliado ──1:N── ContactoAfiliado   (contabilida
 - **Usuario** — `rol` es `afiliado` o `admin`. Dentro de admin, `sub_rol` separa
   al **administrador** (gestiona todo) del **consultor** (consulta y exporta,
   pero no aprueba documentos ni registra pagos).
-- **Afiliado** — RNC único, categoría (clase A/B/C), estado (activo, pendiente,
-  vencido), fechas de afiliación y vencimiento, cuota anual.
+- **Afiliado** — nombre, tipo de afiliación (constructor, proveedor,
+  desarrollador), estado (activo, pendiente, vencido), fechas de afiliación y
+  vencimiento, cuota anual. El RNC y el tipo son opcionales: el padrón real de
+  ADECLA no los tiene para todas las empresas.
 - **ContactoAfiliado** — una persona por área con nombre, cargo, teléfono y
   correo. Tabla aparte en lugar de doce columnas en la ficha: sumar un área
   nueva no obliga a migrar `afiliados`, y "todos los contactos de contabilidad"
