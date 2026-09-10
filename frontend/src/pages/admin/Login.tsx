@@ -79,9 +79,7 @@ export default function LoginAdmin() {
           </Boton>
         </div>
 
-        <p className="text-center font-mono text-[0.62rem] tracking-[0.05em] text-hueso/40 uppercase">
-          Sesión auditada · las cuentas del staff las crea un administrador
-        </p>
+
 
         <Link to="/login" className="text-center text-xs text-hueso/50 hover:text-hueso">
           ← Volver al portal de afiliados
