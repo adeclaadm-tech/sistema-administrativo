@@ -9,15 +9,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { Boton, Cargando, Tabla, Tarjeta, Vacio } from "../../components/ui";
-import { api } from "../../lib/api";
+import { Aviso, Boton, Cargando, Tabla, Tarjeta, Vacio } from "../../components/ui";
+import { ApiError, api } from "../../lib/api";
 import { fecha, money } from "../../lib/format";
+import { useAuth } from "../../lib/auth";
 import type { Proforma } from "../../lib/types";
 
 type Filtro = "todas" | "pendientes" | "pagadas";
 
 export default function Proformas() {
+  const { puedeEscribir } = useAuth();
   const [proformas, setProformas] = useState<Proforma[] | null>(null);
+  const [anulando, setAnulando] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<Filtro>("todas");
   const [periodo, setPeriodo] = useState<number | "">("");
   const [busqueda, setBusqueda] = useState("");
@@ -42,6 +46,21 @@ export default function Proformas() {
         (p.afiliado_nombre ?? "").toLowerCase().includes(q),
     );
   }, [proformas, busqueda]);
+
+  async function anular(p: Proforma) {
+    if (!window.confirm(`¿Anular la proforma ${p.numero}? No se puede deshacer.`)) return;
+    setAnulando(p.id);
+    setAviso(null);
+    try {
+      const r = await api.delete<{ detail: string }>(`/proformas/${p.id}`);
+      setAviso(r.detail);
+      setProformas((previas) => (previas ?? []).filter((x) => x.id !== p.id));
+    } catch (e) {
+      setAviso(e instanceof ApiError ? e.message : "No se pudo anular.");
+    } finally {
+      setAnulando(null);
+    }
+  }
 
   const anio = new Date().getFullYear();
   const anios = [anio + 1, anio, anio - 1, anio - 2];
@@ -72,6 +91,8 @@ export default function Proformas() {
           </Tarjeta>
         ) : null}
       </header>
+
+      {aviso ? <Aviso tono="teal">{aviso}</Aviso> : null}
 
       <Tarjeta className="flex flex-col gap-4 p-5">
         <input
@@ -143,13 +164,23 @@ export default function Proformas() {
                   {p.pago_id ? "Saldada" : "Sin pagar"}
                 </span>
               </td>
-              <td className="px-4 py-3 text-right">
+              <td className="px-4 py-3 text-right whitespace-nowrap">
                 <Boton
                   variante="fantasma"
                   onClick={() => void api.descargar(`/proformas/${p.id}/pdf`)}
                 >
                   PDF
                 </Boton>
+                {puedeEscribir && !p.pago_id ? (
+                  <Boton
+                    variante="fantasma"
+                    className="text-vencido"
+                    cargando={anulando === p.id}
+                    onClick={() => void anular(p)}
+                  >
+                    Anular
+                  </Boton>
+                ) : null}
               </td>
             </tr>
           ))}

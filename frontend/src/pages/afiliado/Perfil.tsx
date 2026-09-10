@@ -10,7 +10,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Aviso, Boton, Campo, Cargando, Tarjeta } from "../../components/ui";
 import { ApiError, api } from "../../lib/api";
 import { AREA_CONTACTO, categoriaTexto, fecha } from "../../lib/format";
-import type { Afiliado, AreaContacto, ResumenAfiliado } from "../../lib/types";
+import { useAuth } from "../../lib/auth";
+import type { Afiliado, AreaContacto, ResumenAfiliado, Usuario } from "../../lib/types";
 
 const AREAS: AreaContacto[] = ["contabilidad", "marketing", "comercial"];
 
@@ -18,6 +19,7 @@ type FormaContacto = { nombre: string; cargo: string; telefono: string; email: s
 const CONTACTO_VACIO: FormaContacto = { nombre: "", cargo: "", telefono: "", email: "" };
 
 export default function Perfil() {
+  const { usuario, refrescarUsuario } = useAuth();
   const [afiliado, setAfiliado] = useState<Afiliado | null>(null);
   const [contactos, setContactos] = useState<Record<AreaContacto, FormaContacto>>({
     contabilidad: { ...CONTACTO_VACIO },
@@ -68,6 +70,13 @@ export default function Perfil() {
     }
 
     try {
+      // La cuenta y la ficha son dos recursos distintos: el nombre de usuario
+      // vive en el usuario, no en el afiliado.
+      const cuenta = await api.patch<Usuario>("/auth/me", {
+        usuario: datos.usuario.trim() || null,
+      });
+      refrescarUsuario(cuenta);
+
       const actualizado = await api.patch<Afiliado>("/afiliados/me", {
         representante: datos.representante || null,
         email: datos.email || null,
@@ -99,6 +108,33 @@ export default function Perfil() {
 
       {mensaje ? <Aviso tono="teal">{mensaje}</Aviso> : null}
       {error ? <Aviso tono="vencido">{error}</Aviso> : null}
+
+      <Tarjeta className="flex flex-col gap-5">
+        <div className="flex flex-col gap-1">
+          <h2 className="font-heading text-xl">Tu cuenta</h2>
+          <p className="text-sm text-tinta-suave">
+            Con lo que entras al portal. El correo lo usamos también para avisarte de vencimientos y
+            proformas.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Campo
+            etiqueta="Correo de acceso"
+            defaultValue={usuario?.email ?? ""}
+            disabled
+            ayuda="Para cambiarlo, escríbele al equipo de ADECLA."
+          />
+          <Campo
+            etiqueta="Nombre de usuario"
+            name="usuario"
+            defaultValue={usuario?.usuario ?? ""}
+            placeholder="mi-constructora"
+            pattern="[a-zA-Z0-9._-]+"
+            minLength={3}
+            ayuda="Opcional. Te sirve para entrar sin escribir el correo."
+          />
+        </div>
+      </Tarjeta>
 
       <Tarjeta className="flex flex-col gap-5">
         <h2 className="font-heading text-xl">Datos de la empresa</h2>

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { Boton, Cargando, DocumentoBadge, EstadoBadge, Tarjeta } from "../../components/ui";
+import { Aviso, Boton, Cargando, DocumentoBadge, EstadoBadge, Tarjeta } from "../../components/ui";
 import { api } from "../../lib/api";
 import { TIPO_DOCUMENTO, fecha, money, notaEstado } from "../../lib/format";
-import type { Documento, Pago, ResumenAfiliado } from "../../lib/types";
+import type { Documento, Pago, Proforma, ResumenAfiliado } from "../../lib/types";
 
 const COLOR_BARRA: Record<string, string> = {
   activo: "bg-activo",
@@ -18,16 +18,19 @@ export default function Dashboard() {
   const [resumen, setResumen] = useState<ResumenAfiliado | null>(null);
   const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [pagos, setPagos] = useState<Pago[]>([]);
+  const [proformas, setProformas] = useState<Proforma[]>([]);
 
   useEffect(() => {
     api.get<ResumenAfiliado>("/afiliados/me").then(setResumen).catch(() => setResumen(null));
     api.get<Documento[]>("/documentos/me").then(setDocumentos).catch(() => setDocumentos([]));
     api.get<Pago[]>("/pagos/me").then(setPagos).catch(() => setPagos([]));
+    api.get<Proforma[]>("/proformas/me").then(setProformas).catch(() => setProformas([]));
   }, []);
 
   if (!resumen) return <Cargando />;
 
   const { afiliado } = resumen;
+  const porPagar = proformas.filter((p) => !p.pago_id);
   const anioAfiliacion = afiliado.fecha_afiliacion
     ? new Date(afiliado.fecha_afiliacion).getFullYear()
     : null;
@@ -41,6 +44,22 @@ export default function Dashboard() {
         </div>
         <EstadoBadge estado={afiliado.estado} />
       </header>
+
+      {porPagar.length > 0 ? (
+        <Aviso>
+          <span className="flex flex-wrap items-center gap-x-2">
+            <strong className="font-semibold">
+              {porPagar.length === 1
+                ? `Tienes la proforma ${porPagar[0].numero} por pagar`
+                : `Tienes ${porPagar.length} proformas por pagar`}
+            </strong>
+            <span>· descarga el PDF con los datos de la cuenta y sube el comprobante.</span>
+            <Link to="/portal/pagos" className="font-semibold text-teal-boton hover:underline">
+              Ver proformas
+            </Link>
+          </span>
+        </Aviso>
+      ) : null}
 
       <Tarjeta className="grid gap-8 lg:grid-cols-[1.4fr_1px_1fr] lg:items-center">
         <div className="flex flex-col gap-3.5">
@@ -85,7 +104,7 @@ export default function Dashboard() {
           </Link>
           <Link to="/portal/pagos">
             <Boton variante="contorno" className="w-full py-3.5">
-              Ver mis proformas
+              {porPagar.length > 0 ? "Pagar mi proforma" : "Ver mis proformas"}
             </Boton>
           </Link>
           <span className="text-center font-mono text-[0.68rem] tracking-wider text-tinta-tenue uppercase">

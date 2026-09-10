@@ -13,6 +13,7 @@ from app.core.deps import Admin, Administrador, DbSession, UsuarioActual
 from app.models.afiliado import Afiliado
 from app.models.enums import RolUsuario
 from app.models.proforma import Proforma
+from app.schemas.common import Mensaje
 from app.schemas.proforma import ProformaCrear, ProformaOut
 from app.services import correo, storage
 from app.services.proformas import crear_proforma, generar_pdf
@@ -128,6 +129,43 @@ def emitir(
         )
 
     return _salida(proforma)
+
+
+@router.delete("/{proforma_id}", response_model=Mensaje, summary="Anular proforma")
+def anular(proforma_id: uuid.UUID, admin: Administrador, db: DbSession) -> Mensaje:
+    """Solo se anulan las que nadie pagó.
+
+    Una proforma saldada es el respaldo de un cobro que ya entró: borrarla
+    dejaría el pago sin documento que lo justifique. Para deshacer eso hay que
+    anular antes el pago.
+    """
+    proforma = db.get(Proforma, proforma_id)
+    if proforma is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proforma no encontrada.")
+
+    if proforma.pago_id is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"La proforma {proforma.numero} ya está saldada por un pago. "
+                "Anula primero el pago si de verdad hay que eliminarla."
+            ),
+        )
+
+    numero = proforma.numero
+    llave = proforma.pdf_url
+    db.delete(proforma)
+    db.commit()
+
+    if llave:
+        try:
+            storage.eliminar_archivo(llave)
+        except storage.StorageError:
+            # El registro ya no está; el objeto huérfano lo limpia el ciclo de
+            # vida del bucket.
+            pass
+
+    return Mensaje(detail=f"Proforma {numero} anulada.")
 
 
 @router.get("/{proforma_id}/pdf", summary="Descargar el PDF")

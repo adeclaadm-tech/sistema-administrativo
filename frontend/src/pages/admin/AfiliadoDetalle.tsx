@@ -49,6 +49,9 @@ export default function AfiliadoDetalle() {
   const [editando, setEditando] = useState(false);
   const [recordando, setRecordando] = useState(false);
   const [emitiendoProforma, setEmitiendoProforma] = useState(false);
+  // La recién emitida: mientras siga a la vista se puede deshacer, que es
+  // el caso de haberla mandado a la empresa equivocada o con el monto mal.
+  const [reciente, setReciente] = useState<Proforma | null>(null);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -82,6 +85,19 @@ export default function AfiliadoDetalle() {
       cargar();
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "No se pudo guardar la revisión.");
+    }
+  }
+
+  async function deshacerProforma() {
+    if (!reciente) return;
+    setError(null);
+    try {
+      const r = await api.delete<{ detail: string }>(`/proformas/${reciente.id}`);
+      setReciente(null);
+      setMensaje(r.detail);
+      cargar();
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "No se pudo anular la proforma.");
     }
   }
 
@@ -190,6 +206,22 @@ export default function AfiliadoDetalle() {
         )}
       </header>
 
+      {reciente ? (
+        <Aviso tono="teal">
+          <span className="flex flex-wrap items-center gap-3">
+            <span>
+              Proforma <strong>{reciente.numero}</strong> emitida. El afiliado ya puede descargarla.
+            </span>
+            <button
+              onClick={() => void deshacerProforma()}
+              className="font-semibold text-vencido underline underline-offset-2"
+            >
+              Deshacer
+            </button>
+          </span>
+        </Aviso>
+      ) : null}
+
       {mensaje ? <Aviso tono="teal">{mensaje}</Aviso> : null}
       {error ? <Aviso tono="vencido">{error}</Aviso> : null}
 
@@ -212,7 +244,8 @@ export default function AfiliadoDetalle() {
           onCancelar={() => setEmitiendoProforma(false)}
           onEmitida={(p) => {
             setEmitiendoProforma(false);
-            setMensaje(`Proforma ${p.numero} emitida. El afiliado ya puede descargarla.`);
+            setReciente(p);
+            setMensaje(null);
             cargar();
           }}
         />

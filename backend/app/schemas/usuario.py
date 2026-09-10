@@ -26,6 +26,15 @@ class UsuarioActualizar(BaseModel):
     activo: bool | None = None
 
 
+class MiCuentaActualizar(BaseModel):
+    """Lo que el propio usuario puede cambiar de su cuenta."""
+
+    nombre: str | None = Field(None, min_length=2, max_length=160)
+    usuario: str | None = Field(
+        None, min_length=3, max_length=60, pattern=r"^[a-zA-Z0-9._-]+$"
+    )
+
+
 class CambiarPassword(BaseModel):
     password_actual: str
     password_nueva: str = Field(min_length=8, max_length=128)

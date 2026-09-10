@@ -19,6 +19,7 @@ interface EstadoAuth {
   entrar: (identificador: string, password: string) => Promise<Usuario>;
   registrar: (datos: Record<string, unknown>) => Promise<Usuario>;
   salir: () => void;
+  refrescarUsuario: (usuario: Usuario) => void;
   esAdmin: boolean;
   puedeEscribir: boolean;
 }
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       entrar,
       registrar,
       salir,
+      refrescarUsuario: setUsuario,
       esAdmin: usuario?.rol === "admin",
       puedeEscribir: usuario?.rol === "admin" && usuario.sub_rol === "administrador",
     }),

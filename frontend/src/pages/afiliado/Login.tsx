@@ -148,8 +148,7 @@ export default function Login() {
           </Boton>
 
           <p className="text-xs leading-relaxed text-tinta-tenue">
-            ¿Primera vez? El registro requiere RNC, cédula del representante y soporte de pago de la
-            cuota anual. Tu afiliación queda pendiente hasta que el equipo revise los documentos.
+            ¿Primera vez? Crear cuenta.
           </p>
 
           <Link to="/admin/login" className="text-xs text-tinta-tenue hover:text-tinta">

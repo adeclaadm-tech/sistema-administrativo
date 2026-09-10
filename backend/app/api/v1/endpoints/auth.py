@@ -23,7 +23,7 @@ from app.schemas.auth import (
     RegistroAfiliadoRequest,
     TokenPair,
 )
-from app.schemas.usuario import CambiarPassword, UsuarioOut
+from app.schemas.usuario import CambiarPassword, MiCuentaActualizar, UsuarioOut
 from app.schemas.common import Mensaje
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -168,6 +168,32 @@ def refrescar(datos: RefreshRequest, db: DbSession) -> TokenPair:
 
 @router.get("/me", response_model=UsuarioOut)
 def yo(usuario: UsuarioActual) -> UsuarioOut:
+    return UsuarioOut.model_validate(usuario)
+
+
+@router.patch("/me", response_model=UsuarioOut, summary="Cambiar mi nombre o usuario")
+def actualizar_mi_cuenta(
+    datos: MiCuentaActualizar, usuario: UsuarioActual, db: DbSession
+) -> UsuarioOut:
+    if datos.usuario is not None:
+        nuevo = datos.usuario.strip().lower()
+        ocupado = db.scalar(
+            select(Usuario).where(
+                func.lower(Usuario.usuario) == nuevo, Usuario.id != usuario.id
+            )
+        )
+        if ocupado:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ese nombre de usuario ya está tomado. Prueba con otro.",
+            )
+        usuario.usuario = nuevo
+
+    if datos.nombre is not None:
+        usuario.nombre = datos.nombre.strip()
+
+    db.commit()
+    db.refresh(usuario)
     return UsuarioOut.model_validate(usuario)
 
 
