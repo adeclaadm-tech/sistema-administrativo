@@ -102,8 +102,13 @@ def listar(
     if categoria:
         consulta = consulta.where(Afiliado.categoria == categoria)
     if vence_en_dias is not None:
+        # Acotado por abajo con la fecha de hoy: sin eso, "vence en 30 días"
+        # arrastraba también a los que vencieron hace meses y la lista no
+        # cuadraba con la métrica del dashboard, que sí excluye el pasado.
+        # Para ver los vencidos está el filtro de estado.
         consulta = consulta.where(
             Afiliado.fecha_vencimiento.is_not(None),
+            Afiliado.fecha_vencimiento >= func.current_date(),
             Afiliado.fecha_vencimiento <= func.current_date() + vence_en_dias,
         )
 

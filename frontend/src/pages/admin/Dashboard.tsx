@@ -75,12 +75,15 @@ export default function DashboardAdmin() {
           valor={metricas.activos}
           pie={`${porcentajeActivos}% de la base`}
         />
-        <Metrica
-          etiqueta="Próximos a vencer"
-          valor={metricas.proximos_a_vencer}
-          pie="vencen en 30 días"
-          acento="pendiente"
-        />
+        <Link to="/admin/afiliados?vence=30" className="contents">
+          <Metrica
+            etiqueta="Próximos a vencer"
+            valor={metricas.proximos_a_vencer}
+            pie="vencen en 30 días · ver listado"
+            acento="pendiente"
+            interactiva
+          />
+        </Link>
         <Metrica
           etiqueta="Pendientes de revisión"
           valor={metricas.documentos_por_revisar}

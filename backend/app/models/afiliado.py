@@ -28,17 +28,22 @@ class Afiliado(Base, UUIDMixin, TimestampMixin):
         nullable=True,
     )
 
-    # Identificador fiscal de la empresa: es la llave con la que busca el staff.
-    rnc_cedula: Mapped[str] = mapped_column(String(32), unique=True, index=True, nullable=False)
+    # Identificador fiscal de la empresa y llave de búsqueda del staff.
+    # Nulo a propósito: el padrón que mantiene ADECLA no lo tiene para todas
+    # las empresas, y obligarlo forzaría a inventar valores de relleno que
+    # después nadie sabe distinguir de los reales. Postgres permite varios
+    # nulos bajo un índice único.
+    rnc_cedula: Mapped[Optional[str]] = mapped_column(
+        String(32), unique=True, index=True, nullable=True
+    )
     nombre: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
-    categoria: Mapped[CategoriaAfiliado] = mapped_column(
+    categoria: Mapped[Optional[CategoriaAfiliado]] = mapped_column(
         SAEnum(
             CategoriaAfiliado,
             name="categoria_afiliado",
             values_callable=lambda e: [m.value for m in e],
         ),
-        nullable=False,
-        default=CategoriaAfiliado.CLASE_B,
+        nullable=True,
     )
     estado: Mapped[EstadoAfiliado] = mapped_column(
         SAEnum(

@@ -3,7 +3,7 @@
 export type Rol = "afiliado" | "admin";
 export type SubRol = "administrador" | "consultor";
 export type EstadoAfiliado = "activo" | "pendiente" | "vencido";
-export type Categoria = "clase_a" | "clase_b" | "clase_c";
+export type Categoria = "constructor" | "proveedor" | "desarrollador";
 export type TipoDocumento = "rnc_nid" | "cedula" | "soporte_pago" | "doc_representante";
 export type EstadoDocumento = "pendiente" | "aprobado" | "rechazado";
 export type AreaContacto = "contabilidad" | "marketing" | "comercial";
@@ -42,8 +42,8 @@ export interface Afiliado {
   id: string;
   usuario_id: string | null;
   nombre: string;
-  rnc_cedula: string;
-  categoria: Categoria;
+  rnc_cedula: string | null;
+  categoria: Categoria | null;
   estado: EstadoAfiliado;
   representante: string | null;
   email: string | null;
@@ -61,9 +61,9 @@ export interface Afiliado {
 export interface AfiliadoFila {
   id: string;
   nombre: string;
-  rnc_cedula: string;
+  rnc_cedula: string | null;
   representante: string | null;
-  categoria: Categoria;
+  categoria: Categoria | null;
   estado: EstadoAfiliado;
   fecha_vencimiento: string | null;
 }

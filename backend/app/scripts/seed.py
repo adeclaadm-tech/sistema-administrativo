@@ -43,20 +43,22 @@ STAFF = [
 ]
 
 EMPRESAS = [
-    ("Constructora Bávaro SRL", "1-31-45678-9", "Julio Morales", CategoriaAfiliado.CLASE_B, EstadoAfiliado.PENDIENTE),
-    ("Grupo Inmobiliario Cana", "1-30-11902-4", "Marisol Peña", CategoriaAfiliado.CLASE_A, EstadoAfiliado.ACTIVO),
-    ("Edificaciones del Este SA", "1-31-77410-2", "Rafael Guzmán", CategoriaAfiliado.CLASE_A, EstadoAfiliado.ACTIVO),
-    ("Punta Cana Builders SA", "1-30-55218-7", "Elena Ferreras", CategoriaAfiliado.CLASE_A, EstadoAfiliado.ACTIVO),
-    ("Constructora Verón SRL", "1-32-00841-5", "Andrés Batista", CategoriaAfiliado.CLASE_C, EstadoAfiliado.VENCIDO),
-    ("Arquitectura Macao SRL", "1-31-63077-1", "Yolanda Reyes", CategoriaAfiliado.CLASE_B, EstadoAfiliado.PENDIENTE),
-    ("Desarrollos Uvero Alto", "1-30-98123-6", "Tomás Fernández", CategoriaAfiliado.CLASE_B, EstadoAfiliado.ACTIVO),
-    ("Ingeniería Friusa SRL", "1-32-14456-8", "Carla Núñez", CategoriaAfiliado.CLASE_C, EstadoAfiliado.VENCIDO),
+    ("Constructora Bávaro SRL", "1-31-45678-9", "Julio Morales", CategoriaAfiliado.PROVEEDOR, EstadoAfiliado.PENDIENTE),
+    ("Grupo Inmobiliario Cana", "1-30-11902-4", "Marisol Peña", CategoriaAfiliado.CONSTRUCTOR, EstadoAfiliado.ACTIVO),
+    ("Edificaciones del Este SA", "1-31-77410-2", "Rafael Guzmán", CategoriaAfiliado.CONSTRUCTOR, EstadoAfiliado.ACTIVO),
+    ("Punta Cana Builders SA", "1-30-55218-7", "Elena Ferreras", CategoriaAfiliado.CONSTRUCTOR, EstadoAfiliado.ACTIVO),
+    ("Constructora Verón SRL", "1-32-00841-5", "Andrés Batista", CategoriaAfiliado.DESARROLLADOR, EstadoAfiliado.VENCIDO),
+    ("Arquitectura Macao SRL", "1-31-63077-1", "Yolanda Reyes", CategoriaAfiliado.PROVEEDOR, EstadoAfiliado.PENDIENTE),
+    ("Desarrollos Uvero Alto", "1-30-98123-6", "Tomás Fernández", CategoriaAfiliado.PROVEEDOR, EstadoAfiliado.ACTIVO),
+    ("Ingeniería Friusa SRL", "1-32-14456-8", "Carla Núñez", CategoriaAfiliado.DESARROLLADOR, EstadoAfiliado.VENCIDO),
 ]
 
+# Montos de ejemplo para que las pantallas no salgan en cero; las cuotas
+# reales las define ADECLA y se cargan desde el panel.
 CUOTA = {
-    CategoriaAfiliado.CLASE_A: Decimal("60000.00"),
-    CategoriaAfiliado.CLASE_B: Decimal("45000.00"),
-    CategoriaAfiliado.CLASE_C: Decimal("28000.00"),
+    CategoriaAfiliado.CONSTRUCTOR: Decimal("60000.00"),
+    CategoriaAfiliado.PROVEEDOR: Decimal("45000.00"),
+    CategoriaAfiliado.DESARROLLADOR: Decimal("28000.00"),
 }
 
 # Se descartan del slug: media docena de empresas terminan en SRL o SA y el

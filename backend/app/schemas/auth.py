@@ -46,7 +46,7 @@ class RegistroAfiliadoRequest(BaseModel):
     representante: str = Field(min_length=2, max_length=160)
     telefono: str | None = Field(None, max_length=40)
     direccion: str | None = None
-    categoria: CategoriaAfiliado = CategoriaAfiliado.CLASE_B
+    categoria: CategoriaAfiliado | None = None
 
 
 class SolicitarResetRequest(BaseModel):

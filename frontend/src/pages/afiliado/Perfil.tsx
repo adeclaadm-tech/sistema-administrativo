@@ -9,7 +9,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { Aviso, Boton, Campo, Cargando, Tarjeta } from "../../components/ui";
 import { ApiError, api } from "../../lib/api";
-import { AREA_CONTACTO, CATEGORIA, fecha } from "../../lib/format";
+import { AREA_CONTACTO, categoriaTexto, fecha } from "../../lib/format";
 import type { Afiliado, AreaContacto, ResumenAfiliado } from "../../lib/types";
 
 const AREAS: AreaContacto[] = ["contabilidad", "marketing", "comercial"];
@@ -92,7 +92,7 @@ export default function Perfil() {
         <span className="etiqueta">Mi perfil</span>
         <h1 className="font-heading text-3xl font-semibold">{afiliado.nombre}</h1>
         <p className="cifra font-mono text-xs tracking-wide text-tinta-suave">
-          RNC {afiliado.rnc_cedula} · {CATEGORIA[afiliado.categoria]} · vence{" "}
+          RNC {afiliado.rnc_cedula ?? "pendiente"} · {categoriaTexto(afiliado.categoria)} · vence{" "}
           {fecha(afiliado.fecha_vencimiento)}
         </p>
       </header>

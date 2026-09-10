@@ -27,9 +27,9 @@ from app.schemas.reporte import (
 MESES = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"]
 
 ETIQUETA_CATEGORIA = {
-    CategoriaAfiliado.CLASE_A: "Clase A",
-    CategoriaAfiliado.CLASE_B: "Clase B",
-    CategoriaAfiliado.CLASE_C: "Clase C",
+    CategoriaAfiliado.CONSTRUCTOR: "Constructor",
+    CategoriaAfiliado.PROVEEDOR: "Proveedor",
+    CategoriaAfiliado.DESARROLLADOR: "Desarrollador",
 }
 
 ETIQUETA_ESTADO = {

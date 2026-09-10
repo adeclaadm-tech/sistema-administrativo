@@ -31,9 +31,16 @@ class EstadoAfiliado(str, Enum):
 
 
 class CategoriaAfiliado(str, Enum):
-    CLASE_A = "clase_a"
-    CLASE_B = "clase_b"
-    CLASE_C = "clase_c"
+    """Tipo de afiliación que maneja ADECLA en su padrón.
+
+    Son las mismas tres del sistema de inscripciones al torneo, para que una
+    empresa signifique lo mismo en los dos lados. Queda nula cuando el padrón
+    no la trae: once de las 51 empresas importadas no la tienen asignada.
+    """
+
+    CONSTRUCTOR = "constructor"
+    PROVEEDOR = "proveedor"
+    DESARROLLADOR = "desarrollador"
 
 
 class TipoDocumento(str, Enum):

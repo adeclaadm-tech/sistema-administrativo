@@ -11,8 +11,8 @@ from app.schemas.contacto import ContactoOut, ContactosAfiliado
 
 class AfiliadoBase(BaseModel):
     nombre: str = Field(min_length=2, max_length=200)
-    rnc_cedula: str = Field(min_length=5, max_length=32)
-    categoria: CategoriaAfiliado = CategoriaAfiliado.CLASE_B
+    rnc_cedula: str | None = Field(None, min_length=5, max_length=32)
+    categoria: CategoriaAfiliado | None = None
     representante: str | None = Field(None, max_length=160)
     email: EmailStr | None = None
     telefono: str | None = Field(None, max_length=40)
@@ -68,9 +68,9 @@ class AfiliadoListaOut(ORMModel):
 
     id: uuid.UUID
     nombre: str
-    rnc_cedula: str
+    rnc_cedula: str | None = None
     representante: str | None = None
-    categoria: CategoriaAfiliado
+    categoria: CategoriaAfiliado | None = None
     estado: EstadoAfiliado
     fecha_vencimiento: date | None = None
 
@@ -79,8 +79,8 @@ class AfiliadoOut(ORMModel):
     id: uuid.UUID
     usuario_id: uuid.UUID | None = None
     nombre: str
-    rnc_cedula: str
-    categoria: CategoriaAfiliado
+    rnc_cedula: str | None = None
+    categoria: CategoriaAfiliado | None = None
     estado: EstadoAfiliado
     representante: str | None = None
     email: EmailStr | None = None

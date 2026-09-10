@@ -1,0 +1,512 @@
+[
+  {
+    "sourceId": "5",
+    "name": "Dario Auto Paint SRL-DAPSA",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Ruben Rodriguez",
+    "phone": null,
+    "email": "R.rodriguez@dapsa.do",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "8",
+    "name": "Abreu-Medina",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Cristian Medina",
+    "phone": "(809)383-9807",
+    "email": "cristian@abreu-medina.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "10",
+    "name": "Acuarium Piscina & Spa",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Raul Rosario",
+    "phone": "+1 (809) 723-2000",
+    "email": "r.rosario@acuariumrd.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "12",
+    "name": "Alaver",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "Keila Matos",
+    "phone": null,
+    "email": "sjimenez@alaver.com.do",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "18",
+    "name": "ARENACAL-PRO SRL",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Fernando de los Santos",
+    "phone": "1 (829) 638-8797",
+    "email": "Fdelossantos@arenacal.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "19",
+    "name": "Arichy Development",
+    "previousName": null,
+    "affiliationType": "DESARROLLADOR",
+    "contactName": "Priscila Bravo",
+    "phone": null,
+    "email": "marketing@arichyrealestate.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "22",
+    "name": "Arve Real Estate , Srl (consarve,srl)",
+    "previousName": null,
+    "affiliationType": "DESARROLLADOR",
+    "contactName": "Nadiuska Martinez",
+    "phone": null,
+    "email": "nmartinez@grupoarverd.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "24",
+    "name": "Morteros de Europa",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Roberto Alfonso Rondón Perez",
+    "phone": "1 (829) 276-3996",
+    "email": "roberto.rondon@morteros.net",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "31",
+    "name": "Bestimpro",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Jordi Vidal",
+    "phone": "1 (829) 761-7451",
+    "email": "Info@bestinprogroup.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "32",
+    "name": "BOHC PROJECTS SRL (Permisologia y Planos Tecnicos)",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "Eyla Vargas Español",
+    "phone": "1 (829) 914-1314",
+    "email": "EVARGAS@bohc.net",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "40",
+    "name": "Cielos Acusticos",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Wanda Rodriguez",
+    "phone": null,
+    "email": "Mfmartinez@cielosacusticos.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "43",
+    "name": "Civilmek",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Milton Lorenzo Franco Garcia",
+    "phone": "+1 (829) 521-0864",
+    "email": "mlfranco@civilmek.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "48",
+    "name": "Consorcio Remix",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Eva Jimenez",
+    "phone": "+1 (809) 723-2928",
+    "email": "e.jimenez@remixsa.do",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "53",
+    "name": "Constructora Heco",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Tao Herrera",
+    "phone": "(809)222-5454",
+    "email": "taoherrera@constructoraheco.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "59",
+    "name": "Constructora Morales Fernandez",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Arnold Morales",
+    "phone": null,
+    "email": "arnold41@hotmail.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "61",
+    "name": "Constructora Tio Betances",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Quilvio Tió",
+    "phone": "(829) 274-2176",
+    "email": "quilviotio@hotmail.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "71",
+    "name": "Devince srl",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Kristh H de La Rosa",
+    "phone": "1(809)404-5299",
+    "email": "krist@gcpi.info",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "74",
+    "name": "Dirava Construcciones",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Jose Rafael Abreu",
+    "phone": "1 (809) 904-6525",
+    "email": "joserafael@riversiderd.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "77",
+    "name": "DOWNTOWN SOLUTIONS SERVICES YAR, SRL",
+    "previousName": "Down Town Punta Cana",
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Ramón Fernandez",
+    "phone": "(829)471-3910",
+    "email": "comercializacion@conmivial.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "81",
+    "name": "Empresa Cosntructora Avila Martinez (Ecam)",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Felix Avila",
+    "phone": null,
+    "email": "f.avila@grupoecam.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "82",
+    "name": "EON",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Rafael Chireno",
+    "phone": "(809)763-5051",
+    "email": "r.chireno@eonrd.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "85",
+    "name": "Estudio Roman Lantigua",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Abraham Roman Collado",
+    "phone": "1 (829) 708-1827",
+    "email": "aroman@estudiorl.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "96",
+    "name": "GDI Grupo Desarrolo Inmobiliario",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Vicente Cruz",
+    "phone": "(809)961-5126",
+    "email": "vicentecruz25@gmail.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "98",
+    "name": "Corporacion Irash",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "Carlos Sabogal.",
+    "phone": null,
+    "email": "gerencia@irashdo.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "99",
+    "name": "Green Bay",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Avi Hidalgo",
+    "phone": "1 (809) 337-6510",
+    "email": "greenbaybrokers@gmail.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "101",
+    "name": "Grupo BAK",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Mariano Briceño",
+    "phone": "1 (809) 804-0292",
+    "email": "a.delacruz@grupobak.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "102",
+    "name": "Grupo Dupla",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Daniel Santana",
+    "phone": "(809)519-5320",
+    "email": "daniel@grupodupla.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "104",
+    "name": "Gesproin SRL",
+    "previousName": "Gesproin",
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Joan Trilla",
+    "phone": "1 (829) 418-0700",
+    "email": "dsanchez@gesproingroup.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "107",
+    "name": "Grupo VAC",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Jey Rodriguez",
+    "phone": "1 (829) 452-1054",
+    "email": "g.esaa@vac.com.do",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "110",
+    "name": "Home Rise Group SRL",
+    "previousName": null,
+    "affiliationType": "DESARROLLADOR",
+    "contactName": "Ana Hernandez",
+    "phone": "1 (829)960-3030",
+    "email": "info@homerisegroup.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "117",
+    "name": "Idea Diseño y Supervisión SRL",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Michelle Vargas",
+    "phone": "1 (809) 6693455",
+    "email": "m.vargas@idea.com.do",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "131",
+    "name": "KG Constructora",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Alfonso Khouri",
+    "phone": "1 (809) 696-1771",
+    "email": "alfonso@kgco.net",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "132",
+    "name": "kma developments",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "Jose Gabril Pujols",
+    "phone": "(809)783-5100",
+    "email": "msolis@kmadevelopments.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "140",
+    "name": "Metaldom",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Neyda Montero",
+    "phone": "1 (829) 961-2811",
+    "email": "neyda.montero@metaldom.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "141",
+    "name": "Miqui Architeds & Builders",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Juan Francisco Miqui",
+    "phone": null,
+    "email": "archmiqui@gmail.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "143",
+    "name": "MY uniforms",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Damaris",
+    "phone": "1 (829) 222-9592",
+    "email": "mmonterrubio@myu.do",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "144",
+    "name": "Nexo Habitat Desarrolladores",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Jose Vicente",
+    "phone": null,
+    "email": "joseb@nexo-habitat.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "150",
+    "name": "Orbis Esperanza Soriano Dominguez",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "Orbis Esperanza Soriano",
+    "phone": "8098771509",
+    "email": "Orbis.soriano@gmail.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "158",
+    "name": "PRDSA, SAS- Prodesa",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Ivan Caballero",
+    "phone": "(849) 564-2107",
+    "email": "Caballero.i@prodesa.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "159",
+    "name": "Proidec",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Carlos Bueno",
+    "phone": "(809)959-0611",
+    "email": "cbueno@proidec.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "160",
+    "name": "RACH INVESTMENT GROUP SRL",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "Aristide Ramirez",
+    "phone": "+1 (809) 707-3921",
+    "email": "a.ramirez@arm.com.do",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "165",
+    "name": "Roberto Rijo Arquitectos Asociados, SRL",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "Carolina Rijo",
+    "phone": "1 (829) 539-1537",
+    "email": "carolinarijob@yahoo.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "171",
+    "name": "SUMO CONSTRUCTORA, S.R.L.",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Ivan Montero",
+    "phone": null,
+    "email": "msuarez@sumoconstructora.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "172",
+    "name": "Sun Wave Trading Group",
+    "previousName": null,
+    "affiliationType": "PROVEEDOR",
+    "contactName": "Wilson Mejia",
+    "phone": "1 (809) 383-8429",
+    "email": "wmejia@puntacana.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "177",
+    "name": "The Point Punta Cana",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "The Point",
+    "phone": "34 677 83 90 27",
+    "email": "corina@thepointpc.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "179",
+    "name": "Utopia Development S.R.L.",
+    "previousName": null,
+    "affiliationType": "DESARROLLADOR",
+    "contactName": "Daniel Garcia",
+    "phone": null,
+    "email": "compras@utopiadevelop.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "180",
+    "name": "Vanderhorts & Asociados",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "Jacqueline Pumarol",
+    "phone": "1 (809) 841-7686",
+    "email": "japury20@gmail.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "181",
+    "name": "VIIS DESIGN, EIRL",
+    "previousName": null,
+    "affiliationType": null,
+    "contactName": "Silvia Soonets",
+    "phone": null,
+    "email": "Silvia@viis.design",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "185",
+    "name": "Grupo Zoemar",
+    "previousName": "Zoemar",
+    "affiliationType": null,
+    "contactName": "Gaudis Marizan",
+    "phone": null,
+    "email": "gmarizan@zoemargroup.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "228",
+    "name": "ARPEGO GROUP SRL",
+    "previousName": null,
+    "affiliationType": "CONSTRUCTOR",
+    "contactName": "Stephanie Goico",
+    "phone": "1 (829)641 6506",
+    "email": "s.goico@arpegogroup.com",
+    "status": "ACTIVO"
+  },
+  {
+    "sourceId": "229",
+    "name": "JOSEDA SOLUCIONES SRL",
+    "previousName": null,
+    "affiliationType": "DESARROLLADOR",
+    "contactName": "Carla Viera",
+    "phone": "1 (829) 704-7626",
+    "email": "cviera@grupojoseda.com",
+    "status": "ACTIVO"
+  }
+]

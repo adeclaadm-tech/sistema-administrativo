@@ -240,6 +240,24 @@ docker compose exec backend alembic downgrade -1
    cuenta de solo lectura.
 
    **No corras el seed en producción**: crea ocho constructoras de mentira.
+7. Carga el padrón real de afiliados, también una sola vez:
+
+   ```bash
+   python -m app.scripts.importar_padron
+   ```
+
+   Son las 51 empresas del listado que mantiene ADECLA, las mismas que usa el
+   sistema de inscripciones al torneo. Trae nombre, tipo de afiliación,
+   persona de contacto, teléfono y correo.
+
+   Lo que **no** trae, porque no está en el origen: RNC, fechas de afiliación
+   y vencimiento, y montos de cuota. Quedan vacíos a propósito; se completan
+   desde `Editar ficha` en cada afiliado. Rellenarlos con valores inventados
+   haría imposible distinguir después un dato real de uno de relleno.
+
+   Es idempotente: reconoce las empresas por nombre y actualiza en vez de
+   duplicar, así que se puede volver a correr cuando el listado cambie. Con
+   `--vence 2026-12-31` les pone a todas la misma fecha de vencimiento.
 
 ### Frontend en Vercel
 

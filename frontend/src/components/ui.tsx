@@ -136,16 +136,18 @@ export function Metrica({
   valor,
   pie,
   acento,
+  interactiva = false,
 }: {
   etiqueta: string;
   valor: string | number;
   pie?: string;
   acento?: "teal" | "pendiente" | "vencido";
+  interactiva?: boolean;
 }) {
   const color =
     acento === "pendiente" ? "text-pendiente" : acento === "vencido" ? "text-vencido" : "text-tinta";
   return (
-    <Tarjeta className="flex flex-col gap-1.5">
+    <Tarjeta className="flex w-full flex-col gap-1.5" interactiva={interactiva}>
       <span className="etiqueta">{etiqueta}</span>
       <span className={`cifra font-heading text-4xl leading-none font-semibold ${color}`}>
         {valor}

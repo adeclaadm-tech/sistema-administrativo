@@ -14,9 +14,10 @@ import {
   Vacio,
 } from "../../components/ui";
 import { ApiError, api } from "../../lib/api";
+import EditarAfiliado from "../../components/EditarAfiliado";
 import {
   AREA_CONTACTO,
-  CATEGORIA,
+  categoriaTexto,
   PISTA_DOCUMENTO,
   TIPO_DOCUMENTO,
   fecha,
@@ -43,6 +44,7 @@ export default function AfiliadoDetalle() {
   const [pagos, setPagos] = useState<Pago[]>([]);
   const [proformas, setProformas] = useState<Proforma[]>([]);
   const [formularioPago, setFormularioPago] = useState(false);
+  const [editando, setEditando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -142,7 +144,15 @@ export default function AfiliadoDetalle() {
         </div>
         {puedeEscribir ? (
           <div className="flex gap-2">
-            <Boton variante="contorno">Enviar recordatorio</Boton>
+            <Boton
+              variante="contorno"
+              onClick={() => {
+                setEditando((v) => !v);
+                setFormularioPago(false);
+              }}
+            >
+              {editando ? "Cerrar edición" : "Editar ficha"}
+            </Boton>
             <Boton onClick={() => setFormularioPago((v) => !v)}>
               {formularioPago ? "Cancelar" : "Registrar pago"}
             </Boton>
@@ -154,6 +164,18 @@ export default function AfiliadoDetalle() {
 
       {mensaje ? <Aviso tono="teal">{mensaje}</Aviso> : null}
       {error ? <Aviso tono="vencido">{error}</Aviso> : null}
+
+      {editando && puedeEscribir ? (
+        <EditarAfiliado
+          afiliado={afiliado}
+          onCancelar={() => setEditando(false)}
+          onGuardado={(actualizado) => {
+            setAfiliado(actualizado);
+            setEditando(false);
+            setMensaje("Ficha actualizada.");
+          }}
+        />
+      ) : null}
 
       {formularioPago && puedeEscribir ? (
         <Tarjeta className="flex flex-col gap-5">
@@ -212,9 +234,9 @@ export default function AfiliadoDetalle() {
       ) : null}
 
       <Tarjeta className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Dato etiqueta="RNC" valor={afiliado.rnc_cedula} mono />
+        <Dato etiqueta="RNC" valor={afiliado.rnc_cedula ?? "—"} mono />
         <Dato etiqueta="Representante" valor={afiliado.representante ?? "—"} />
-        <Dato etiqueta="Categoría" valor={CATEGORIA[afiliado.categoria]} />
+        <Dato etiqueta="Tipo" valor={categoriaTexto(afiliado.categoria)} />
         <Dato etiqueta="Vence" valor={fecha(afiliado.fecha_vencimiento)} mono />
         <Dato etiqueta="Correo" valor={afiliado.email ?? "—"} />
         <Dato etiqueta="Teléfono" valor={afiliado.telefono ?? "—"} mono />

@@ -1,11 +1,11 @@
 /** Pantalla 1g: tabla densa con búsqueda y filtros por estado. */
 
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import { Boton, Cargando, EstadoBadge, Tabla, Tarjeta, Vacio } from "../../components/ui";
 import { api } from "../../lib/api";
-import { CATEGORIA, fechaCorta } from "../../lib/format";
+import { CATEGORIA, categoriaTexto, fechaCorta } from "../../lib/format";
 import { useAuth } from "../../lib/auth";
 import type { AfiliadoFila, Categoria, EstadoAfiliado, Metricas, Pagina } from "../../lib/types";
 
@@ -19,6 +19,9 @@ export default function Afiliados() {
   const [filtro, setFiltro] = useState<Filtro>("todos");
   const [categoria, setCategoria] = useState<Categoria | "">("");
   const [page, setPage] = useState(1);
+  // La tarjeta de "próximos a vencer" del dashboard enlaza aquí con ?vence=30.
+  const [parametros, setParametros] = useSearchParams();
+  const venceEnDias = parametros.get("vence");
 
   const cargar = useCallback(() => {
     api
@@ -26,12 +29,13 @@ export default function Afiliados() {
         q: busqueda || undefined,
         estado: filtro === "todos" ? undefined : filtro,
         categoria: categoria || undefined,
+        vence_en_dias: venceEnDias ?? undefined,
         page,
         per_page: 10,
       })
       .then(setPagina)
       .catch(() => setPagina(null));
-  }, [busqueda, filtro, categoria, page]);
+  }, [busqueda, filtro, categoria, venceEnDias, page]);
 
   useEffect(() => {
     const id = setTimeout(cargar, busqueda ? 250 : 0);
@@ -105,6 +109,21 @@ export default function Afiliados() {
             </button>
           ))}
 
+          <button
+            onClick={() => {
+              setParametros(venceEnDias ? {} : { vence: "30" });
+              setPage(1);
+            }}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-[0.06em] uppercase transition-colors ${
+              venceEnDias
+                ? "bg-pendiente text-hueso"
+                : "border border-borde text-tinta-suave hover:border-borde-fuerte"
+            }`}
+          >
+            Vencen en 30 días
+            {metricas ? ` · ${metricas.proximos_a_vencer}` : ""}
+          </button>
+
           <select
             className="ml-auto rounded-[8px] border border-borde bg-superficie px-3 py-1.5 text-xs tracking-[0.06em] text-tinta-suave uppercase"
             value={categoria}
@@ -135,9 +154,11 @@ export default function Afiliados() {
             {pagina.items.map((fila) => (
               <tr key={fila.id} className="border-b border-borde last:border-0 hover:bg-hueso">
                 <td className="px-4 py-3 font-medium">{fila.nombre}</td>
-                <td className="cifra px-4 py-3 font-mono text-xs text-tinta-suave">{fila.rnc_cedula}</td>
+                <td className="cifra px-4 py-3 font-mono text-xs text-tinta-suave">
+                  {fila.rnc_cedula ?? "—"}
+                </td>
                 <td className="px-4 py-3 text-tinta-suave">{fila.representante ?? "—"}</td>
-                <td className="px-4 py-3 text-tinta-suave">{CATEGORIA[fila.categoria]}</td>
+                <td className="px-4 py-3 text-tinta-suave">{categoriaTexto(fila.categoria)}</td>
                 <td className="cifra px-4 py-3 font-mono text-xs">{fechaCorta(fila.fecha_vencimiento)}</td>
                 <td className="px-4 py-3">
                   <EstadoBadge estado={fila.estado} />

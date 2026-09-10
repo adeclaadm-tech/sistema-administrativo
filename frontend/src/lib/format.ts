@@ -78,10 +78,15 @@ export const ESTADO_DOCUMENTO: Record<EstadoDocumento, string> = {
 };
 
 export const CATEGORIA: Record<Categoria, string> = {
-  clase_a: "Clase A",
-  clase_b: "Clase B",
-  clase_c: "Clase C",
+  constructor: "Constructor",
+  proveedor: "Proveedor",
+  desarrollador: "Desarrollador",
 };
+
+/** El padrón no le asigna tipo a todas las empresas. */
+export function categoriaTexto(categoria: Categoria | null | undefined): string {
+  return categoria ? CATEGORIA[categoria] : "Sin tipo";
+}
 
 export const TIPO_DOCUMENTO: Record<TipoDocumento, string> = {
   rnc_nid: "Registro Nacional del Contribuyente",
