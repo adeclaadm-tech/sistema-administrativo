@@ -14,6 +14,7 @@ export class ApiError extends Error {
     public status: number,
     message: string,
     public errores?: { campo: string; mensaje: string }[],
+    public causa?: unknown,
   ) {
     super(message);
     this.name = "ApiError";
@@ -35,6 +36,23 @@ export const token = {
 
 type Opciones = Omit<RequestInit, "body"> & { body?: unknown; query?: Record<string, unknown> };
 
+/** Traduce el fallo de red al error de configuración que casi siempre es. */
+function mensajeDeRed(destino: string): string {
+  const apuntaALocal = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(destino);
+  const paginaSegura = window.location.protocol === "https:";
+
+  if (apuntaALocal && paginaSegura) {
+    return (
+      "Esta versión quedó apuntando a localhost. Define VITE_API_URL con la URL " +
+      "del backend y vuelve a desplegar: Vite la incrusta al compilar, no al cargar."
+    );
+  }
+  return (
+    `No pudimos conectar con ${new URL(destino).origin}. Puede estar caído, o el ` +
+    "dominio de esta página no está en CORS_ORIGINS del backend."
+  );
+}
+
 function construirUrl(ruta: string, query?: Record<string, unknown>): string {
   const url = new URL(BASE + ruta, window.location.origin);
   if (query) {
@@ -51,15 +69,26 @@ async function ejecutar<T>(ruta: string, opciones: Opciones = {}): Promise<T> {
   const { body, query, headers, ...resto } = opciones;
   const esFormData = body instanceof FormData;
 
-  const respuesta = await fetch(construirUrl(ruta, query), {
-    ...resto,
-    headers: {
-      ...(esFormData ? {} : body !== undefined ? { "Content-Type": "application/json" } : {}),
-      ...(token.get() ? { Authorization: `Bearer ${token.get()}` } : {}),
-      ...headers,
-    },
-    body: esFormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  const destino = construirUrl(ruta, query);
+
+  let respuesta: Response;
+  try {
+    respuesta = await fetch(destino, {
+      ...resto,
+      headers: {
+        ...(esFormData ? {} : body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...(token.get() ? { Authorization: `Bearer ${token.get()}` } : {}),
+        ...headers,
+      },
+      body: esFormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch (causa) {
+    // El navegador no le cuenta a JavaScript por qué falló: CORS, DNS y
+    // servidor caído llegan aquí como el mismo TypeError. Lo único que
+    // podemos hacer es decir a dónde se estaba llamando, que es justo el dato
+    // que hace falta para distinguirlos.
+    throw new ApiError(0, mensajeDeRed(destino), undefined, causa);
+  }
 
   if (respuesta.status === 401) {
     token.clear();
