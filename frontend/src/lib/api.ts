@@ -5,7 +5,45 @@
  * apunta a Railway hoy y a un droplet mañana sin tocar código.
  */
 
-const BASE = (import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1").replace(/\/$/, "");
+/**
+ * Normaliza lo que venga en VITE_API_URL.
+ *
+ * Sin esquema, `new URL(base + ruta, origin)` resuelve contra el propio sitio:
+ * la llamada se queda en el dominio del frontend y el hosting responde 405 al
+ * POST, que no se parece en nada al problema real. Se completa el esquema y se
+ * avisa por consola de lo que falte.
+ */
+function normalizarBase(valor: string): string {
+  const limpio = valor.trim().replace(/\/$/, "");
+
+  // Una base relativa ("/api/v1") es legítima si algo hace de proxy en el
+  // mismo dominio; se respeta tal cual.
+  if (limpio.startsWith("/")) return limpio;
+
+  const conEsquema = /^https?:\/\//.test(limpio) ? limpio : `https://${limpio}`;
+  if (conEsquema !== limpio) {
+    console.warn(
+      `[ADECLA] VITE_API_URL no traía esquema. Se asume "${conEsquema}". ` +
+        "Defínela con https:// para evitar sorpresas.",
+    );
+  }
+
+  try {
+    const url = new URL(conEsquema);
+    if (url.pathname === "/" || url.pathname === "") {
+      console.warn(
+        `[ADECLA] VITE_API_URL apunta a "${url.origin}" sin ruta. La API vive bajo ` +
+          "/api/v1: probablemente falte ese sufijo.",
+      );
+    }
+  } catch {
+    console.error(`[ADECLA] VITE_API_URL no es una URL válida: "${valor}"`);
+  }
+
+  return conEsquema;
+}
+
+const BASE = normalizarBase(import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1");
 const LLAVE_TOKEN = "adecla.access_token";
 const LLAVE_REFRESH = "adecla.refresh_token";
 
