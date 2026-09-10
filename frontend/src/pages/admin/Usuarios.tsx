@@ -54,7 +54,7 @@ export default function Usuarios() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <span className="etiqueta">{usuarios.length} cuentas</span>
-          <h1 className="font-heading text-3xl font-semibold">Usuarios del staff</h1>
+          <h1 className="font-heading text-3xl">Usuarios del staff</h1>
         </div>
         <Boton onClick={() => setCreando((v) => !v)}>
           {creando ? "Cancelar" : "Nueva cuenta"}

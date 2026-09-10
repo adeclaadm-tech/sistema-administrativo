@@ -67,7 +67,7 @@ export default function Reportes() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <span className="etiqueta">Gestión</span>
-          <h1 className="font-heading text-3xl font-semibold">Reportes</h1>
+          <h1 className="font-heading text-3xl">Reportes</h1>
         </div>
         <div className="flex gap-2">
           <Boton variante="contorno" onClick={() => exportar("xlsx")}>
@@ -147,7 +147,7 @@ export default function Reportes() {
 
           <Tarjeta className="flex flex-col gap-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="font-heading text-xl font-semibold">Afiliaciones por mes y estado</h2>
+              <h2 className="font-heading text-xl">Afiliaciones por mes y estado</h2>
               <div className="flex gap-4 text-xs text-tinta-suave">
                 {SERIES.map((s) => (
                   <span key={s.clave} className="flex items-center gap-1.5">

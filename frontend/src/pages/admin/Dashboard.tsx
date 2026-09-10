@@ -55,7 +55,7 @@ export default function DashboardAdmin() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <span className="etiqueta">Periodo {new Date().getFullYear()}</span>
-          <h1 className="font-heading text-3xl font-semibold">Dashboard general</h1>
+          <h1 className="font-heading text-3xl">Dashboard general</h1>
         </div>
         {puedeEscribir ? (
           <Link to="/admin/afiliados">
@@ -95,7 +95,7 @@ export default function DashboardAdmin() {
       <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
         <Tarjeta className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-heading text-xl font-semibold">Cola de revisión</h2>
+            <h2 className="font-heading text-xl">Cola de revisión</h2>
             <Link to="/admin/documentos" className="text-sm text-teal-boton hover:underline">
               Ver todos ({metricas.documentos_por_revisar})
             </Link>
@@ -165,7 +165,7 @@ export default function DashboardAdmin() {
 
         <div className="flex flex-col gap-5">
           <Tarjeta className="flex flex-col gap-4">
-            <h2 className="font-heading text-xl font-semibold">Composición de la base</h2>
+            <h2 className="font-heading text-xl">Composición de la base</h2>
             <ul className="flex flex-col gap-3">
               {composicion.map((fila) => (
                 <li key={fila.texto} className="flex flex-col gap-1.5">

@@ -48,7 +48,7 @@ export default function DocumentosAdmin() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
         <span className="etiqueta">{cola.length} en cola</span>
-        <h1 className="font-heading text-3xl font-semibold">Documentos por revisar</h1>
+        <h1 className="font-heading text-3xl">Documentos por revisar</h1>
       </header>
 
       {error ? <Aviso tono="vencido">{error}</Aviso> : null}

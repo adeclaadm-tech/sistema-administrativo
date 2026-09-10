@@ -30,7 +30,7 @@ export default function PagosAdmin() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <span className="etiqueta">{pagina?.total ?? 0} pagos registrados</span>
-          <h1 className="font-heading text-3xl font-semibold">Pagos</h1>
+          <h1 className="font-heading text-3xl">Pagos</h1>
         </div>
         <div className="flex items-center gap-3">
           <select

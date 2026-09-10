@@ -138,7 +138,7 @@ export default function AfiliadoDetalle() {
               : "Sin fecha de afiliación"}
           </span>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-heading text-3xl font-semibold">{afiliado.nombre}</h1>
+            <h1 className="font-heading text-3xl">{afiliado.nombre}</h1>
             <EstadoBadge estado={afiliado.estado} />
           </div>
         </div>
@@ -179,7 +179,7 @@ export default function AfiliadoDetalle() {
 
       {formularioPago && puedeEscribir ? (
         <Tarjeta className="flex flex-col gap-5">
-          <h2 className="font-heading text-xl font-semibold">Registrar pago</h2>
+          <h2 className="font-heading text-xl">Registrar pago</h2>
           <form onSubmit={registrarPago} className="flex flex-col gap-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Campo
@@ -245,7 +245,7 @@ export default function AfiliadoDetalle() {
       </Tarjeta>
 
       <Tarjeta className="flex flex-col gap-5">
-        <h2 className="font-heading text-xl font-semibold">Contactos por área</h2>
+        <h2 className="font-heading text-xl">Contactos por área</h2>
         <div className="grid gap-5 md:grid-cols-3">
           {(["contabilidad", "marketing", "comercial"] as const).map((area) => {
             const contacto = contactos.get(area);
@@ -273,7 +273,7 @@ export default function AfiliadoDetalle() {
       <div className="grid gap-5 xl:grid-cols-2">
         <Tarjeta className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-heading text-xl font-semibold">Documentos subidos</h2>
+            <h2 className="font-heading text-xl">Documentos subidos</h2>
             {porRevisar > 0 ? (
               <span className="font-mono text-[0.68rem] tracking-wider text-pendiente uppercase">
                 {porRevisar} por revisar
@@ -325,7 +325,7 @@ export default function AfiliadoDetalle() {
         </Tarjeta>
 
         <Tarjeta className="flex flex-col gap-4">
-          <h2 className="font-heading text-xl font-semibold">Historial de pagos</h2>
+          <h2 className="font-heading text-xl">Historial de pagos</h2>
 
           {pagos.length === 0 ? (
             <Vacio titulo="Sin pagos" detalle="Registra el primer pago desde el botón de arriba." />

@@ -67,13 +67,34 @@
     line-height: 1.6;
   }
 
+  /* Escala tipográfica del MVP del torneo. Los pesos intermedios (560, 520)
+     solo existen porque Fraunces se carga como fuente variable con los ejes
+     opsz y SOFT: con instancias estáticas, el navegador redondearía al 600 y
+     los titulares se verían más pesados de lo que el sistema define. */
   h1,
   h2,
   h3 {
     font-family: var(--font-heading);
     color: var(--color-tinta);
-    letter-spacing: -0.01em;
+    font-optical-sizing: auto;
     text-wrap: balance;
+  }
+
+  /* Display / Headline: hero del portal, títulos de página y el nombre de la
+     empresa en su ficha. Es el texto más grande de cada pantalla. */
+  h1 {
+    font-weight: 560;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  /* Title: títulos de tarjeta. Van más pesados que el display, no más
+     ligeros: a 1.25rem un peso bajo se lee desvaído junto al cuerpo. */
+  h2,
+  h3 {
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
   }
 
   /* Toda cifra alinea dígito con dígito: es lo que hace legible una tabla de

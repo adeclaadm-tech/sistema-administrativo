@@ -65,7 +65,7 @@ export default function EditarAfiliado({
   return (
     <Tarjeta className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h2 className="font-heading text-xl font-semibold">Editar ficha</h2>
+        <h2 className="font-heading text-xl">Editar ficha</h2>
         <p className="text-sm text-tinta-suave">
           El vencimiento alimenta el aviso de "próximos a vencer" y el estado que ve el afiliado en
           su portal.

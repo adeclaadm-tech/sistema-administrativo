@@ -47,7 +47,7 @@ export default function Documentos() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-7">
       <header className="flex flex-col gap-2.5">
-        <h1 className="font-heading text-3xl font-semibold">Carga de documentos</h1>
+        <h1 className="font-heading text-3xl">Carga de documentos</h1>
         <p className="max-w-xl leading-relaxed text-tinta-suave">
           Sube los cuatro documentos requeridos para mantener tu afiliación vigente. Formatos PDF,
           JPG o PNG, hasta 10 MB por archivo. El equipo de ADECLA revisa cada carga en un plazo de 3

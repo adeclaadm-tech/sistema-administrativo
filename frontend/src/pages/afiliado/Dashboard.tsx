@@ -37,7 +37,7 @@ export default function Dashboard() {
       <header className="flex flex-wrap items-end justify-between gap-5">
         <div className="flex flex-col gap-1.5">
           {anioAfiliacion ? <span className="etiqueta">Afiliado desde {anioAfiliacion}</span> : null}
-          <h1 className="font-heading text-4xl leading-tight font-semibold">{afiliado.nombre}</h1>
+          <h1 className="font-heading text-4xl leading-tight">{afiliado.nombre}</h1>
         </div>
         <EstadoBadge estado={afiliado.estado} />
       </header>
@@ -97,7 +97,7 @@ export default function Dashboard() {
       <div className="grid gap-5 lg:grid-cols-2">
         <Tarjeta className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-heading text-xl font-semibold">Mis documentos</h2>
+            <h2 className="font-heading text-xl">Mis documentos</h2>
             <span className="font-mono text-[0.68rem] tracking-wider text-tinta-suave uppercase">
               {resumen.documentos_aprobados} / {resumen.documentos_totales || 4} aprobados
             </span>
@@ -125,7 +125,7 @@ export default function Dashboard() {
 
         <Tarjeta className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-heading text-xl font-semibold">Últimos pagos</h2>
+            <h2 className="font-heading text-xl">Últimos pagos</h2>
             <Link to="/portal/pagos" className="text-sm text-teal-boton hover:underline">
               Ver historial
             </Link>

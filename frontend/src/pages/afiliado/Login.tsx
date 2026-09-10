@@ -42,7 +42,7 @@ export default function Login() {
         <Logo invertido />
 
         <div className="flex flex-col gap-5">
-          <h1 className="font-heading text-5xl leading-[1.02] font-semibold text-hueso">
+          <h1 className="font-heading text-5xl leading-[1.02] text-hueso">
             Portal de
             <br />
             afiliados

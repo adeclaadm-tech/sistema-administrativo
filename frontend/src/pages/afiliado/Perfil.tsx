@@ -90,7 +90,7 @@ export default function Perfil() {
     <form onSubmit={guardar} className="mx-auto flex max-w-3xl flex-col gap-7">
       <header className="flex flex-col gap-2">
         <span className="etiqueta">Mi perfil</span>
-        <h1 className="font-heading text-3xl font-semibold">{afiliado.nombre}</h1>
+        <h1 className="font-heading text-3xl">{afiliado.nombre}</h1>
         <p className="cifra font-mono text-xs tracking-wide text-tinta-suave">
           RNC {afiliado.rnc_cedula ?? "pendiente"} · {categoriaTexto(afiliado.categoria)} · vence{" "}
           {fecha(afiliado.fecha_vencimiento)}
@@ -101,7 +101,7 @@ export default function Perfil() {
       {error ? <Aviso tono="vencido">{error}</Aviso> : null}
 
       <Tarjeta className="flex flex-col gap-5">
-        <h2 className="font-heading text-xl font-semibold">Datos de la empresa</h2>
+        <h2 className="font-heading text-xl">Datos de la empresa</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Campo etiqueta="Representante" name="representante" defaultValue={afiliado.representante ?? ""} />
           <Campo etiqueta="Correo" name="email" type="email" defaultValue={afiliado.email ?? ""} />
@@ -116,7 +116,7 @@ export default function Perfil() {
 
       <Tarjeta className="flex flex-col gap-6">
         <div className="flex flex-col gap-1.5">
-          <h2 className="font-heading text-xl font-semibold">Contactos por área</h2>
+          <h2 className="font-heading text-xl">Contactos por área</h2>
           <p className="text-sm text-tinta-suave">
             Con quién habla ADECLA en cada departamento. Sirve para cobros, convocatorias a eventos y
             oportunidades comerciales.

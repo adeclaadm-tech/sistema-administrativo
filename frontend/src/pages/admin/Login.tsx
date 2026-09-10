@@ -46,7 +46,7 @@ export default function LoginAdmin() {
           <span className="font-mono text-[0.65rem] tracking-[0.1em] text-hueso/50 uppercase">
             Acceso restringido
           </span>
-          <h1 className="font-heading text-3xl font-semibold text-hueso">Panel administrativo</h1>
+          <h1 className="font-heading text-3xl text-hueso">Panel administrativo</h1>
         </div>
 
         <div className="flex flex-col gap-4 rounded-[14px] bg-superficie p-6">
