@@ -7,6 +7,7 @@ número.
 """
 
 import io
+import pathlib
 import uuid
 from datetime import date
 from decimal import Decimal
@@ -18,6 +19,10 @@ from app.core.config import settings
 from app.models.afiliado import Afiliado
 from app.models.proforma import Proforma
 from app.services import storage
+
+# El imagotipo viaja con el backend: el PDF se genera aquí y no puede depender
+# de que el frontend esté desplegado.
+LOGO = pathlib.Path(__file__).parent / "assets" / "adecla-logo.png"
 
 
 def siguiente_numero(db: Session, anio: int | None = None) -> str:
@@ -75,15 +80,37 @@ def generar_pdf(proforma: Proforma, afiliado: Afiliado) -> io.BytesIO:
     c = pdf_canvas.Canvas(buffer, pagesize=LETTER)
     ancho, alto = LETTER
 
-    c.setFillColor(teal)
-    c.rect(0, alto - 28 * mm, ancho, 28 * mm, stroke=0, fill=1)
+    # Cabecera clara con el imagotipo oficial: sobre la banda teal el texto
+    # oscuro del logo no se lee, y recolorearlo rompería el isotipo.
     c.setFillColor(colors.white)
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(20 * mm, alto - 18 * mm, "ADECLA")
-    c.setFont("Helvetica", 9)
-    c.drawString(20 * mm, alto - 23 * mm, "Asociación de Constructores · Punta Cana, R.D.")
+    c.rect(0, alto - 32 * mm, ancho, 32 * mm, stroke=0, fill=1)
+
+    if LOGO.exists():
+        from reportlab.lib.utils import ImageReader
+
+        logo = ImageReader(str(LOGO))
+        ancho_px, alto_px = logo.getSize()
+        alto_logo = 13 * mm
+        c.drawImage(
+            logo,
+            20 * mm,
+            alto - 25 * mm,
+            width=alto_logo * (ancho_px / alto_px),
+            height=alto_logo,
+            mask="auto",  # respeta la transparencia del PNG
+        )
+    else:  # pragma: no cover - solo si falta el asset
+        c.setFillColor(tinta)
+        c.setFont("Helvetica-Bold", 18)
+        c.drawString(20 * mm, alto - 20 * mm, "ADECLA")
+
+    c.setFillColor(teal)
+    c.setLineWidth(1.2)
+    c.line(20 * mm, alto - 32 * mm, ancho - 20 * mm, alto - 32 * mm)
+
+    c.setFillColor(tinta)
     c.setFont("Helvetica-Bold", 12)
-    c.drawRightString(ancho - 20 * mm, alto - 18 * mm, proforma.numero)
+    c.drawRightString(ancho - 20 * mm, alto - 20 * mm, proforma.numero)
 
     y = alto - 45 * mm
     c.setFillColor(tinta)
@@ -93,7 +120,7 @@ def generar_pdf(proforma: Proforma, afiliado: Afiliado) -> io.BytesIO:
     y -= 12 * mm
     filas = [
         ("Afiliado", afiliado.nombre),
-        ("RNC / Cédula", afiliado.rnc_cedula),
+        ("RNC / Cédula", afiliado.rnc_cedula or "—"),
         ("Representante", afiliado.representante or "—"),
         ("Concepto", proforma.concepto or "—"),
         ("Fecha", proforma.fecha_generacion.strftime("%d/%m/%Y")),
@@ -125,7 +152,8 @@ def generar_pdf(proforma: Proforma, afiliado: Afiliado) -> io.BytesIO:
     c.drawString(
         20 * mm,
         20 * mm,
-        "Documento generado por el sistema de afiliados de ADECLA. No requiere firma.",
+        "Asociación de Desarrolladores y Constructores de la Altagracia · Punta Cana, R.D. · "
+        "Documento generado por el sistema de afiliados. No requiere firma.",
     )
 
     c.showPage()

@@ -53,6 +53,16 @@ class Settings(BaseSettings):
     S3_SIGNED_URL_TTL: int = 3600
     MAX_UPLOAD_MB: int = 10
 
+    # --- Correo (Resend) ---
+    RESEND_API_KEY: str = ""
+    # El remitente tiene que estar en un dominio verificado en Resend, o
+    # rebota todo. Mientras se verifica adecla.do sirve onboarding@resend.dev.
+    EMAIL_FROM: str = "ADECLA <onboarding@resend.dev>"
+    EMAIL_REPLY_TO: str = ""
+    # Se usa para los enlaces y el logo de los correos, así que apunta al
+    # frontend, no a la API.
+    FRONTEND_URL: str = "http://localhost:5173"
+
     # --- Reglas de negocio ---
     CUOTA_ANUAL_DEFAULT: float = 45000.00
     MONEDA: str = "DOP"
@@ -91,6 +101,10 @@ class Settings(BaseSettings):
         if self.CORS_ORIGINS.strip() == "*":
             return ["*"]
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+
+    @property
+    def correo_configurado(self) -> bool:
+        return bool(self.RESEND_API_KEY and self.EMAIL_FROM)
 
     @property
     def storage_configurado(self) -> bool:

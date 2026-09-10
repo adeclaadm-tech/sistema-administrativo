@@ -2,7 +2,7 @@
 
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
-import { Logo } from "../components/ui";
+import Logo from "../components/Logo";
 import { useAuth } from "../lib/auth";
 
 const GESTION = [
@@ -54,7 +54,7 @@ export default function AdminLayout() {
     <div className="min-h-screen bg-hueso lg:grid lg:grid-cols-[248px_1fr]">
       <aside className="flex flex-col border-b border-borde bg-superficie px-4 py-5 lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-b-0">
         <div className="flex items-center gap-2 px-2">
-          <Logo compacto />
+          <Logo tamano="compacto" />
           <span className="rounded bg-tinta px-1.5 py-0.5 font-mono text-[0.6rem] tracking-wider text-hueso">
             ADMIN
           </span>

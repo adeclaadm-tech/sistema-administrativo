@@ -3,7 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { Boton, Campo, Logo } from "../../components/ui";
+import { Boton, Campo } from "../../components/ui";
+import Logo from "../../components/Logo";
 import { ApiError } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 
@@ -36,7 +37,7 @@ export default function LoginAdmin() {
     <div className="grid min-h-screen place-items-center bg-tinta px-6 py-14">
       <form onSubmit={manejar} className="flex w-full max-w-sm flex-col gap-6">
         <div className="flex items-center gap-2">
-          <Logo compacto invertido />
+          <Logo sobreFondoOscuro />
           <span className="rounded bg-hueso/15 px-1.5 py-0.5 font-mono text-[0.6rem] tracking-wider text-hueso">
             ADMIN
           </span>

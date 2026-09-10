@@ -1,6 +1,7 @@
 """CRUD de afiliados (panel) y ficha propia (portal)."""
 
 import uuid
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -23,6 +24,7 @@ from app.schemas.afiliado import (
 )
 from app.schemas.common import Mensaje, Pagina
 from app.schemas.contacto import ContactoActualizar, ContactoOut
+from app.services import correo
 from app.services.afiliados import aplicar_contactos, construir_resumen
 
 router = APIRouter(prefix="/afiliados", tags=["afiliados"])
@@ -207,6 +209,47 @@ def actualizar(
     db.commit()
     db.refresh(afiliado)
     return AfiliadoOut.model_validate(afiliado)
+
+
+@router.post(
+    "/{afiliado_id}/recordatorio",
+    response_model=Mensaje,
+    summary="Enviar recordatorio de vencimiento",
+)
+def enviar_recordatorio(afiliado_id: uuid.UUID, admin: Administrador, db: DbSession) -> Mensaje:
+    afiliado = _obtener(db, afiliado_id)
+
+    # Se prefiere el contacto de contabilidad: es quien paga. Si no hay, el
+    # correo general de la empresa.
+    contable = next(
+        (c for c in afiliado.contactos if c.area == AreaContacto.CONTABILIDAD and c.email), None
+    )
+    destino = (contable.email if contable else None) or afiliado.email
+    if not destino:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Este afiliado no tiene correo. Agrégalo en la ficha o en sus contactos.",
+        )
+
+    dias = (afiliado.fecha_vencimiento - date.today()).days if afiliado.fecha_vencimiento else None
+    monto = f"RD$ {afiliado.cuota_anual:,.2f}" if afiliado.cuota_anual else None
+
+    enviado = correo.enviar(
+        correo.recordatorio_vencimiento(
+            para=destino,
+            empresa=afiliado.nombre,
+            vence=afiliado.fecha_vencimiento,
+            dias=dias,
+            monto=monto,
+        )
+    )
+
+    if not enviado:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="El correo no salió. Revisa que RESEND_API_KEY esté configurada.",
+        )
+    return Mensaje(detail=f"Recordatorio enviado a {destino}.")
 
 
 @router.delete("/{afiliado_id}", response_model=Mensaje, summary="Eliminar afiliado")

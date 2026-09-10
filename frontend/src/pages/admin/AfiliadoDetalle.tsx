@@ -45,6 +45,7 @@ export default function AfiliadoDetalle() {
   const [proformas, setProformas] = useState<Proforma[]>([]);
   const [formularioPago, setFormularioPago] = useState(false);
   const [editando, setEditando] = useState(false);
+  const [enviandoAviso, setEnviandoAviso] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -78,6 +79,20 @@ export default function AfiliadoDetalle() {
       cargar();
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "No se pudo guardar la revisión.");
+    }
+  }
+
+  async function enviarRecordatorio() {
+    setEnviandoAviso(true);
+    setError(null);
+    setMensaje(null);
+    try {
+      const r = await api.post<{ detail: string }>(`/afiliados/${id}/recordatorio`);
+      setMensaje(r.detail);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "No se pudo enviar el recordatorio.");
+    } finally {
+      setEnviandoAviso(false);
     }
   }
 
@@ -144,6 +159,13 @@ export default function AfiliadoDetalle() {
         </div>
         {puedeEscribir ? (
           <div className="flex gap-2">
+            <Boton
+              variante="contorno"
+              cargando={enviandoAviso}
+              onClick={() => void enviarRecordatorio()}
+            >
+              Enviar recordatorio
+            </Boton>
             <Boton
               variante="contorno"
               onClick={() => {

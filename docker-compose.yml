@@ -76,6 +76,10 @@ services:
       S3_SECRET_ACCESS_KEY: adecla-local-secret
       S3_BUCKET: adecla-documentos
       CUOTA_ANUAL_DEFAULT: "45000"
+      # Sin llave de Resend los correos se registran en el log en vez de
+      # enviarse; para probar de verdad, pon tu llave aquí.
+      RESEND_API_KEY: "${RESEND_API_KEY:-}"
+      FRONTEND_URL: "http://localhost:5173"
     ports:
       - "8000:8000"
     volumes:

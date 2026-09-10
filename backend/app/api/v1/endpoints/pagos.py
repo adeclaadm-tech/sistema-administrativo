@@ -13,6 +13,7 @@ from app.models.enums import EstadoAfiliado, RolUsuario
 from app.models.pago import Pago
 from app.schemas.common import Mensaje, Pagina
 from app.schemas.pago import PagoActualizar, PagoConProformaOut, PagoCrear, PagoOut
+from app.services import correo
 from app.services.proformas import crear_proforma
 
 router = APIRouter(prefix="/pagos", tags=["pagos"])
@@ -114,6 +115,17 @@ def registrar(
 
     db.commit()
     db.refresh(pago)
+
+    if afiliado.email:
+        correo.enviar(
+            correo.pago_registrado(
+                para=afiliado.email,
+                empresa=afiliado.nombre,
+                monto=f"RD$ {pago.monto:,.2f}",
+                periodo=pago.periodo,
+                proforma=proforma.numero if proforma else None,
+            )
+        )
 
     return PagoConProformaOut(
         pago=PagoOut.model_validate(pago),

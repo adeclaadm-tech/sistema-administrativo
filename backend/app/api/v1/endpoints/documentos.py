@@ -24,11 +24,18 @@ from app.schemas.documento import (
     DocumentoSubidoOut,
     RevisionDocumento,
 )
-from app.services import storage
+from app.services import correo, storage
 
 router = APIRouter(prefix="/documentos", tags=["documentos"])
 
 TIPOS_PERMITIDOS = {"application/pdf", "image/jpeg", "image/jpg", "image/png"}
+
+ETIQUETA_DOCUMENTO = {
+    TipoDocumento.RNC_NID: "Registro Nacional del Contribuyente",
+    TipoDocumento.CEDULA: "Cédula del representante",
+    TipoDocumento.SOPORTE_PAGO: "Soporte de pago de la cuota",
+    TipoDocumento.DOC_REPRESENTANTE: "Documentos del representante",
+}
 
 
 def _salida(doc: Documento) -> DocumentoOut:
@@ -224,6 +231,23 @@ def revisar(
 
     db.commit()
     db.refresh(doc)
+
+    # El afiliado tiene que enterarse sin entrar a mirar: un rechazo sin aviso
+    # es una renovación que se queda parada semanas. Si el correo falla, la
+    # revisión ya está guardada y no se deshace por eso.
+    afiliado = doc.afiliado
+    destino = afiliado.email
+    if destino:
+        correo.enviar(
+            correo.documento_revisado(
+                para=destino,
+                empresa=afiliado.nombre,
+                documento=ETIQUETA_DOCUMENTO.get(doc.tipo, doc.tipo.value),
+                aprobado=datos.aprobado,
+                motivo=datos.motivo_rechazo,
+            )
+        )
+
     return _salida(doc)
 
 

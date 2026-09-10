@@ -2,7 +2,7 @@
 
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
-import { Logo } from "../components/ui";
+import Logo from "../components/Logo";
 import { useAuth } from "../lib/auth";
 
 const RUTAS = [
@@ -28,7 +28,7 @@ export default function PortalLayout() {
       <header className="border-b border-borde bg-superficie">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-6">
           <div className="flex items-center gap-10">
-            <Logo compacto />
+            <Logo tamano="compacto" />
             <nav className="hidden gap-7 text-sm md:flex">
               {RUTAS.map((ruta) => (
                 <NavLink
@@ -85,7 +85,7 @@ export default function PortalLayout() {
       </main>
 
       <footer className="mx-auto max-w-6xl px-6 pb-10 text-xs text-tinta-tenue">
-        Asociación de Constructores · Punta Cana, República Dominicana
+        Asociación de Desarrolladores y Constructores de la Altagracia · Punta Cana, R.D.
       </footer>
     </div>
   );

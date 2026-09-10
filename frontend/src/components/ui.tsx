@@ -11,31 +11,6 @@ import type { EstadoAfiliado, EstadoDocumento } from "../lib/types";
 import { ESTADO_AFILIADO, ESTADO_DOCUMENTO } from "../lib/format";
 
 /* -------------------------------------------------------------------------- */
-/* Marca                                                                      */
-/* -------------------------------------------------------------------------- */
-
-export function Logo({ compacto = false, invertido = false }: { compacto?: boolean; invertido?: boolean }) {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span
-        className={`grid place-items-center rounded-lg bg-teal font-heading font-semibold text-white ${
-          compacto ? "h-7 w-7 text-base" : "h-9 w-9 text-xl"
-        }`}
-      >
-        A
-      </span>
-      <span
-        className={`font-heading font-semibold tracking-wide ${compacto ? "text-lg" : "text-xl"} ${
-          invertido ? "text-hueso" : "text-tinta"
-        }`}
-      >
-        ADECLA
-      </span>
-    </span>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
 /* Controles                                                                  */
 /* -------------------------------------------------------------------------- */
 

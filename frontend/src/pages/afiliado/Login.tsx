@@ -3,7 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { Boton, Campo, Logo } from "../../components/ui";
+import { Boton, Campo } from "../../components/ui";
+import Logo from "../../components/Logo";
 import { ApiError } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 
@@ -39,7 +40,7 @@ export default function Login() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <aside className="flex flex-col justify-between gap-12 bg-tinta px-10 py-14 text-hueso lg:px-14">
-        <Logo invertido />
+        <Logo tamano="grande" sobreFondoOscuro />
 
         <div className="flex flex-col gap-5">
           <h1 className="font-heading text-5xl leading-[1.02] text-hueso">
@@ -54,8 +55,8 @@ export default function Login() {
         </div>
 
         <div className="flex flex-col gap-1.5 font-mono text-[0.65rem] tracking-[0.05em] text-hueso/50">
-          <span>ASOCIACIÓN DE CONSTRUCTORES</span>
-          <span>PUNTA CANA · REP. DOMINICANA</span>
+          <span>ASOCIACIÓN DE DESARROLLADORES</span>
+          <span>Y CONSTRUCTORES DE LA ALTAGRACIA</span>
         </div>
       </aside>
 

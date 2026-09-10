@@ -28,7 +28,7 @@ app = FastAPI(
     version="0.1.0",
     description=(
         "Backend del portal de afiliados y del panel administrativo de ADECLA "
-        "(Asociación de Constructores, Punta Cana)."
+        "(Asociación de Desarrolladores y Constructores de la Altagracia)."
     ),
     docs_url="/docs",
     redoc_url="/redoc",

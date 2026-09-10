@@ -1,6 +1,7 @@
 # ADECLA · Sistema de afiliados
 
-Sistema administrativo de la Asociación de Constructores de Punta Cana. Son dos
+Sistema administrativo de ADECLA, Asociación de Desarrolladores y Constructores
+de la Altagracia (Punta Cana). Son dos
 portales sobre un mismo backend:
 
 - **Portal de afiliados** — el constructor consulta el estado de su afiliación,
@@ -282,6 +283,32 @@ frontend después.
 El `Dockerfile` de `frontend/` no lo usa Vercel. Está para el día que todo se
 mude a un droplet: sirve el build con nginx, escucha en `${PORT}` y aborta el
 build si el bundle quedó apuntando a `localhost`.
+
+### Correo con Resend
+
+Los avisos salen por [Resend](https://resend.com). Tres momentos los disparan:
+
+| Cuándo | A quién | Qué dice |
+| --- | --- | --- |
+| El staff aprueba o rechaza un documento | al correo del afiliado | qué documento, y el motivo si fue rechazo |
+| El staff registra un pago | al correo del afiliado | monto, período y número de proforma |
+| El staff pulsa "Enviar recordatorio" en la ficha | al contacto de contabilidad, o al correo general | cuánto falta para el vencimiento y la cuota |
+
+Variables:
+
+| Variable | Valor |
+| --- | --- |
+| `RESEND_API_KEY` | la llave de la cuenta |
+| `EMAIL_FROM` | `ADECLA <gestion@adecla.do>` — el dominio debe estar verificado en Resend |
+| `EMAIL_REPLY_TO` | a dónde contestan los afiliados |
+| `FRONTEND_URL` | el dominio de Vercel: se usa en los enlaces y el logo del correo |
+
+Sin `RESEND_API_KEY` nada se rompe: el envío se salta y queda en el log lo que
+se habría mandado. Un correo que falla tampoco deshace la operación que lo
+disparó — aprobar un documento se guarda aunque el aviso no salga.
+
+Mientras se verifica el dominio, `onboarding@resend.dev` funciona como
+remitente de prueba, pero solo entrega a la dirección dueña de la cuenta.
 
 ### Storage de documentos
 
